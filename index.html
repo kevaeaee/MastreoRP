@@ -3,923 +3,543 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MoestordRP Hub &bull; Official Platform</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Website Maintenance - Ultimate Cyberpunk</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    animation: {
-                        'marquee': 'marqueeTicker 40s linear infinite',
-                        'aurora-1': 'auroraMove1 14s ease-in-out infinite alternate',
-                        'aurora-2': 'auroraMove2 18s ease-in-out infinite alternate',
-                        'pulse-glow': 'pulseGlow 4s ease-in-out infinite alternate',
-                        'float': 'floatAnim 6s ease-in-out infinite',
-                        'scale-in': 'scaleInAnim 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        cyber: ['Orbitron', 'sans-serif'],
                     },
-                    keyframes: {
-                        marqueeTicker: {
-                            '0%': { transform: 'translateX(0%)' },
-                            '100%': { transform: 'translateX(-50%)' }
-                        },
-                        auroraMove1: {
-                            '0%': { transform: 'translate(0px, 0px) scale(1) rotate(0deg)' },
-                            '100%': { transform: 'translate(60px, 80px) scale(1.2) rotate(15deg)' }
-                        },
-                        auroraMove2: {
-                            '0%': { transform: 'translate(0px, 0px) scale(1) rotate(0deg)' },
-                            '100%': { transform: 'translate(-70px, -60px) scale(1.25) rotate(-15deg)' }
-                        },
-                        pulseGlow: {
-                            '0%': { opacity: 0.4, filter: 'blur(110px)' },
-                            '100%': { opacity: 0.85, filter: 'blur(150px)' }
-                        },
-                        floatAnim: {
-                            '0%, 100%': { transform: 'translateY(0px)' },
-                            '50%': { transform: 'translateY(-10px)' }
-                        },
-                        scaleInAnim: {
-                            '0%': { opacity: 0, transform: 'scale(0.8)' },
-                            '100%': { opacity: 1, transform: 'scale(1)' }
+                    colors: {
+                        neon: {
+                            cyan: '#00f3ff',
+                            pink: '#ff00ea',
+                            purple: '#bc13fe',
+                            blue: '#0b3954'
                         }
                     }
                 }
             }
         }
     </script>
-    <!-- Alpine.js Core -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
-        .font-outfit { font-family: 'Outfit', sans-serif; }
+        body, html {
+            margin: 0; padding: 0; overflow: hidden; height: 100%;
+            background-color: #050505;
+            transition: background-color 0.5s ease;
+        }
+        html:not(.dark) body {
+            background-color: #f0f4f8;
+        }
+
+        /* Canvas Background */
+        #particle-canvas {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: auto; /* Allow mouse interaction */
+        }
+
+        /* 3D Tilt Container & Glass Card */
+        .tilt-container {
+            perspective: 1500px;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            padding: 1rem;
+            pointer-events: none; /* Let canvas get mousemove, we track document */
+        }
+        .glass-card {
+            position: relative;
+            background: rgba(10, 10, 15, 0.4);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.1);
+            transform-style: preserve-3d;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            pointer-events: auto; /* Re-enable pointer events for card */
+            will-change: transform;
+        }
+        html:not(.dark) .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 20px 50px rgba(31, 38, 135, 0.15), inset 0 0 0 1px rgba(255,255,255,0.5);
+        }
         
-        /* Ultra Supreme Glassmorphism */
-        .supreme-glass {
-            background: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(60px);
-            -webkit-backdrop-filter: blur(60px);
-            border: 1px solid rgba(56, 189, 248, 0.35);
-            box-shadow: 0 35px 80px -20px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-        }
-        .dark .supreme-glass {
-            background: rgba(8, 13, 24, 0.78);
-            backdrop-filter: blur(60px);
-            -webkit-backdrop-filter: blur(60px);
-            border: 1px solid rgba(56, 189, 248, 0.25);
-            box-shadow: 0 40px 90px -20px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(56, 189, 248, 0.25);
+        /* Inner glare effect for tilt */
+        .glare {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2) 0%, transparent 50%);
+            opacity: 0;
+            pointer-events: none;
+            border-radius: inherit;
+            transition: opacity 0.3s ease;
+            transform: translateZ(1px); /* Keep slightly above background */
         }
 
-        /* Clean Shadow-Free Glass for Navigation Pill Bar */
-        .clean-nav-glass {
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
-            border: 1px solid rgba(56, 189, 248, 0.35);
-            box-shadow: 0 10px 30px -10px rgba(56, 189, 248, 0.2);
-        }
-        .dark .clean-nav-glass {
-            background: rgba(10, 16, 30, 0.82);
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
-            border: 1px solid rgba(56, 189, 248, 0.25);
-            box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5);
-        }
-
-        /* Ultra Inertial Smooth Theme Switcher UI */
-        .theme-switch {
-            width: 86px;
-            height: 40px;
-            border-radius: 9999px;
+        /* Ultimate Glitch Text */
+        .glitch-wrapper {
             position: relative;
-            cursor: pointer;
-            transition: all 0.9s cubic-bezier(0.25, 1, 0.5, 1);
-            box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(255, 255, 255, 0.15);
-            overflow: hidden;
+            transform: translateZ(30px); /* Pop out in 3D */
+        }
+        .glitch-text {
+            position: relative;
+            color: #fff;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
+        }
+        html:not(.dark) .glitch-text {
+            color: #111;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        }
+        .dark .glitch-text::before, .dark .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+        }
+        .dark .glitch-text::before {
+            left: 3px;
+            text-shadow: -2px 0 var(--neon-pink);
+            clip: rect(24px, 999px, 90px, 0);
+            animation: glitch-anim-1 2.5s infinite linear alternate-reverse;
+        }
+        .dark .glitch-text::after {
+            left: -3px;
+            text-shadow: 2px 0 var(--neon-cyan);
+            clip: rect(85px, 999px, 140px, 0);
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim-1 {
+            0% { clip: rect(15px, 9999px, 44px, 0); }
+            20% { clip: rect(85px, 9999px, 59px, 0); }
+            40% { clip: rect(32px, 9999px, 98px, 0); }
+            60% { clip: rect(78px, 9999px, 23px, 0); }
+            80% { clip: rect(12px, 9999px, 85px, 0); }
+            100% { clip: rect(59px, 9999px, 12px, 0); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(65px, 9999px, 100px, 0); }
+            20% { clip: rect(12px, 9999px, 59px, 0); }
+            40% { clip: rect(85px, 9999px, 23px, 0); }
+            60% { clip: rect(32px, 9999px, 98px, 0); }
+            80% { clip: rect(59px, 9999px, 12px, 0); }
+            100% { clip: rect(10px, 9999px, 44px, 0); }
         }
 
-        /* Interactive Spotlight & Magnetic Hover */
-        .spotlight-card {
+        /* 3D Elements Inside Card */
+        .content-3d {
+            transform: translateZ(20px);
+        }
+        .btn-3d {
+            transform: translateZ(40px);
+        }
+
+        /* Cyberpunk Button */
+        .btn-cyber {
             position: relative;
             overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
         }
-        .spotlight-card:hover {
-            transform: translateY(-4px) scale(1.01);
-            border-color: rgba(56, 189, 248, 0.7);
-            box-shadow: 0 25px 50px -12px rgba(56, 189, 248, 0.35);
+        .btn-cyber.active {
+            box-shadow: 0 0 20px var(--neon-cyan), inset 0 0 10px var(--neon-cyan);
+            border-color: var(--neon-cyan);
+            animation: neon-pulse 1.5s infinite alternate;
         }
-        .spotlight-card::before {
+        .btn-cyber.active::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: radial-gradient(700px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(56, 189, 248, 0.25), transparent 65%);
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: all 0.5s ease;
+        }
+        .btn-cyber.active:hover::before {
+            left: 100%;
+        }
+        @keyframes neon-pulse {
+            0% { box-shadow: 0 0 10px var(--neon-cyan), inset 0 0 5px var(--neon-cyan); }
+            100% { box-shadow: 0 0 30px var(--neon-cyan), inset 0 0 15px var(--neon-cyan); }
+        }
+
+        /* Overlay */
+        #success-overlay {
             opacity: 0;
-            transition: opacity 0.4s ease;
             pointer-events: none;
-            z-index: 1;
+            transition: opacity 0.4s ease;
+            backdrop-filter: blur(30px);
         }
-        .spotlight-card:hover::before { opacity: 1; }
-
-        /* Smooth Pure Height Accordion Transition */
-        .accordion-content {
-            display: grid;
-            grid-template-rows: 0fr;
-            transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-            opacity: 0;
-        }
-        .accordion-content.is-open {
-            grid-template-rows: 1fr;
+        #success-overlay.show {
             opacity: 1;
+            pointer-events: auto;
         }
-        .accordion-inner {
-            overflow: hidden;
-        }
-
-        .cyber-grid {
-            background-image: radial-gradient(rgba(56, 189, 248, 0.15) 1.5px, transparent 1.5px);
-            background-size: 36px 36px;
-        }
-
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.5); border-radius: 9999px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.85); }
     </style>
 </head>
-<body x-data="{ 
-        themeChosen: false,
-        darkMode: true,
-        activeTab: 'pendahuluan',
-        activeRuleTab: 'ingame',
-        sfxEnabled: true,
-        sfxVolume: parseInt(localStorage.getItem('moestord_sfx_vol')) || 75,
-        showVolumeSlider: false,
-        audioCtx: null,
-        openRule: null,
+<body class="text-gray-800 dark:text-gray-200 font-sans selection:bg-neon-pink selection:text-white">
 
-        // Discord Perfect Synchronized Countdown States
-        showDiscordModal: false,
-        discordCountdown: 3,
-        discordTimer: null,
+    <!-- Interactive Particle Background -->
+    <canvas id="particle-canvas"></canvas>
 
-        initAudio() {
-            if (!this.audioCtx) {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                this.audioCtx = new AudioContext();
-            }
-            if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
-        },
+    <!-- Theme Toggle -->
+    <button id="theme-toggle" class="absolute top-6 right-6 z-50 p-3 rounded-full bg-white/10 dark:bg-black/40 backdrop-blur-md border border-white/20 dark:border-neon-cyan/30 hover:scale-110 hover:shadow-[0_0_15px_rgba(0,243,255,0.5)] transition-all duration-300">
+        <svg id="sun-icon" class="w-6 h-6 hidden text-amber-400 drop-shadow-[0_0_5px_rgba(251,191,36,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        <svg id="moon-icon" class="w-6 h-6 text-neon-cyan drop-shadow-[0_0_5px_rgba(0,243,255,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+    </button>
 
-        playSfx(type) {
-            if (!this.sfxEnabled) return;
-            try {
-                this.initAudio();
-                const ctx = this.audioCtx;
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.connect(gain);
-                gain.connect(ctx.destination);
+    <!-- 3D Tilt Wrapper -->
+    <div class="tilt-container">
+        <!-- Main Glass Card -->
+        <div id="tilt-card" class="glass-card w-full max-w-xl p-10 sm:p-14 rounded-3xl text-center flex flex-col items-center">
+            <div class="glare" id="card-glare"></div>
+            
+            <div class="glitch-wrapper mb-6 w-full">
+                <h1 class="text-4xl sm:text-5xl font-cyber font-black tracking-widest leading-tight glitch-text" data-text="WEBSITE MAINTENANCE">
+                    WEBSITE<br><span class="text-neon-pink">MAINTENANCE</span>
+                </h1>
+            </div>
 
-                const multiplier = (this.sfxVolume / 50) * 1.75; 
+            <p class="content-3d text-sm sm:text-base opacity-80 mb-10 max-w-md font-light tracking-widest uppercase">
+                Critical core structures are being re-aligned. Connection will be restored shortly.
+            </p>
 
-                if (type === 'click') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(800, ctx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.04);
-                    gain.gain.setValueAtTime(0.06 * multiplier, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.04);
-                    osc.start(); osc.stop(ctx.currentTime + 0.04);
-                } else if (type === 'tab') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(550, ctx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(950, ctx.currentTime + 0.05);
-                    gain.gain.setValueAtTime(0.08 * multiplier, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
-                    osc.start(); osc.stop(ctx.currentTime + 0.05);
-                } else if (type === 'theme') {
-                    osc.type = 'square';
-                    osc.frequency.setValueAtTime(450, ctx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(1100, ctx.currentTime + 0.08);
-                    gain.gain.setValueAtTime(0.08 * multiplier, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.08);
-                    osc.start(); osc.stop(ctx.currentTime + 0.08);
-                } else if (type === 'accordion') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(650, ctx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.06);
-                    gain.gain.setValueAtTime(0.07 * multiplier, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.06);
-                    osc.start(); osc.stop(ctx.currentTime + 0.06);
-                } else if (type === 'modal') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(400, ctx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1);
-                    gain.gain.setValueAtTime(0.1 * multiplier, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.1);
-                    osc.start(); osc.stop(ctx.currentTime + 0.1);
-                }
-            } catch(e) {}
-        },
+            <!-- Loading Bar -->
+            <div class="content-3d w-full bg-gray-300/30 dark:bg-gray-800/50 rounded-full h-1.5 mb-10 overflow-hidden relative">
+                <div class="absolute top-0 left-0 h-full w-1/3 bg-gradient-to-r from-transparent via-blue-500 to-neon-cyan dark:via-neon-pink dark:to-neon-cyan animate-[slide_1.5s_ease-in-out_infinite]"></div>
+            </div>
 
-        updateVolume(val) {
-            this.sfxVolume = parseInt(val);
-            localStorage.setItem('moestord_sfx_vol', this.sfxVolume);
-            this.playSfx('click');
-        },
+            <!-- Action Button -->
+            <button id="actionBtn" disabled class="btn-3d btn-cyber w-full py-4 px-6 rounded-xl font-cyber font-bold tracking-widest text-lg cursor-not-allowed bg-gray-400/20 dark:bg-black/40 text-gray-500 dark:text-gray-600 border border-transparent backdrop-blur-sm">
+                <span id="btnContent" class="relative z-10 flex items-center justify-center gap-3">
+                    <svg class="w-5 h-5 animate-spin opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    SYSTEM LOCKED (<span id="timerText" class="text-blue-600 dark:text-neon-pink inline-block w-4 text-center">5</span>s)
+                </span>
+            </button>
+        </div>
+    </div>
 
-        openDiscordGateway() {
-            this.playSfx('modal');
-            this.showDiscordModal = true;
-            this.discordCountdown = 3;
-            if (this.discordTimer) clearInterval(this.discordTimer);
+    <!-- Success Overlay -->
+    <div id="success-overlay" class="absolute inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-black/90">
+        <div class="text-center transform transition-transform duration-700 scale-50 opacity-0" id="success-content">
+            <div class="relative inline-flex items-center justify-center w-32 h-32 mb-8">
+                <!-- Outer glowing rings -->
+                <div class="absolute inset-0 rounded-full border-4 border-t-neon-cyan border-r-neon-pink border-b-transparent border-l-transparent animate-spin"></div>
+                <div class="absolute inset-2 rounded-full border-4 border-b-neon-cyan border-l-neon-pink border-t-transparent border-r-transparent animate-[spin_1.5s_linear_infinite_reverse]"></div>
+                <!-- Checkmark -->
+                <div class="bg-green-500/20 rounded-full p-4 shadow-[0_0_50px_rgba(0,255,0,0.4)]">
+                    <svg class="w-12 h-12 text-green-400 drop-shadow-[0_0_10px_rgba(0,255,0,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+            </div>
+            <h2 class="text-4xl sm:text-5xl font-cyber font-bold text-gray-800 dark:text-white mb-3 tracking-wider drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">CONNECTION SECURED</h2>
+            <p class="text-lg text-gray-600 dark:text-neon-cyan/80 font-mono tracking-widest">ESTABLISHING UPLINK...</p>
+        </div>
+    </div>
 
-            this.discordTimer = setInterval(() => {
-                if (this.discordCountdown > 0) {
-                    this.discordCountdown--;
-                    this.playSfx('click');
-                    if (this.discordCountdown === 0) {
-                        clearInterval(this.discordTimer);
-                    }
-                }
-            }, 1000);
-        },
+    <style>
+        @keyframes slide {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(300%); }
+        }
+    </style>
 
-        closeDiscordGateway() {
-            this.playSfx('click');
-            this.showDiscordModal = false;
-            if (this.discordTimer) clearInterval(this.discordTimer);
-        },
+    <script>
+        // --- 1. WEB AUDIO API SYNTHESIZER ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
 
-        switchTab(tabName) {
-            this.playSfx('tab');
-            this.activeTab = tabName;
-            this.openRule = null;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        },
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
 
-        switchRuleTab(ruleTabName) {
-            this.playSfx('tab');
-            this.activeRuleTab = ruleTabName;
-            this.openRule = null;
-        },
+        // Initialize audio on first user interaction to bypass autoplay restrictions
+        ['click', 'keydown', 'mousemove', 'touchstart'].forEach(evt => {
+            document.addEventListener(evt, initAudio, { once: true });
+        });
 
-        toggleRule(id) {
-            this.playSfx('accordion');
-            this.openRule = this.openRule === id ? null : id;
-        },
+        function playSound(type) {
+            if (!audioCtx) return;
+            
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            const now = audioCtx.currentTime;
 
-        selectTheme(mode) {
-            this.playSfx('theme');
-            this.themeChosen = true;
-            if (mode === 'dark') {
-                this.darkMode = true;
-                document.documentElement.classList.add('dark');
-            } else {
-                this.darkMode = false;
-                document.documentElement.classList.remove('dark');
-            }
-        },
+            if (type === 'theme') {
+                // Soft hi-tech blip
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } 
+            else if (type === 'ready') {
+                // Cyberpunk notification chime (two rapid high notes)
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(1046.50, now); // C6
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.setValueAtTime(0, now + 0.1);
+                
+                osc.frequency.setValueAtTime(1318.51, now + 0.15); // E6
+                gainNode.gain.setValueAtTime(0.1, now + 0.15);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                
+                // Add lowpass filter for electronic feel
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 2000;
+                osc.disconnect();
+                osc.connect(filter);
+                filter.connect(gainNode);
 
-        toggleTheme() {
-            this.playSfx('theme');
-            this.darkMode = !this.darkMode;
-            if (this.darkMode) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
+                osc.start(now);
+                osc.stop(now + 0.5);
+            } 
+            else if (type === 'warp') {
+                // Sci-fi warp/activation sound
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(100, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.4);
+                
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(200, now);
+                filter.frequency.exponentialRampToValueAtTime(4000, now + 0.4);
+                filter.Q.value = 10; // High resonance
+                
+                osc.disconnect();
+                osc.connect(filter);
+                filter.connect(gainNode);
+                
+                gainNode.gain.setValueAtTime(0.2, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+                
+                osc.start(now);
+                osc.stop(now + 0.6);
             }
         }
-    }" 
-    @mousemove="
-        $el.querySelectorAll('.spotlight-card').forEach(card => {
+
+        // --- 2. HTML5 CANVAS PARTICLE NETWORK ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null, radius: 150 };
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+        window.addEventListener('mouseout', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        class Particle {
+            constructor(x, y, dx, dy, size) {
+                this.x = x;
+                this.y = y;
+                this.dx = dx;
+                this.dy = dy;
+                this.size = size;
+                this.baseX = this.x;
+                this.baseY = this.y;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                const isDark = document.documentElement.classList.contains('dark');
+                ctx.fillStyle = isDark ? '#00f3ff' : '#0b3954';
+                ctx.fill();
+            }
+            update() {
+                if (this.x > canvas.width || this.x < 0) this.dx = -this.dx;
+                if (this.y > canvas.height || this.y < 0) this.dy = -this.dy;
+
+                // Mouse interaction - subtle repulsion
+                if (mouse.x != null && mouse.y != null) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < mouse.radius) {
+                        const forceDirectionX = dx / distance;
+                        const forceDirectionY = dy / distance;
+                        const force = (mouse.radius - distance) / mouse.radius;
+                        this.x -= forceDirectionX * force * 2;
+                        this.y -= forceDirectionY * force * 2;
+                    }
+                }
+
+                this.x += this.dx;
+                this.y += this.dy;
+                this.draw();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            let numberOfParticles = (canvas.width * canvas.height) / 10000; // Density
+            for (let i = 0; i < numberOfParticles; i++) {
+                let size = (Math.random() * 2) + 1;
+                let x = Math.random() * (canvas.width - size * 2) + size * 2;
+                let y = Math.random() * (canvas.height - size * 2) + size * 2;
+                let dx = (Math.random() - 0.5) * 1.5;
+                let dy = (Math.random() - 0.5) * 1.5;
+                particles.push(new Particle(x, y, dx, dy, size));
+            }
+        }
+
+        function connectParticles() {
+            let opacityValue = 1;
+            const isDark = document.documentElement.classList.contains('dark');
+            const colorRgb = isDark ? '0, 243, 255' : '11, 57, 84';
+
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a; b < particles.length; b++) {
+                    let distance = ((particles[a].x - particles[b].x) * (particles[a].x - particles[b].x))
+                                 + ((particles[a].y - particles[b].y) * (particles[a].y - particles[b].y));
+                    
+                    if (distance < (canvas.width / 7) * (canvas.height / 7)) {
+                        opacityValue = 1 - (distance / 15000);
+                        ctx.strokeStyle = `rgba(${colorRgb}, ${opacityValue})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animateCanvas() {
+            requestAnimationFrame(animateCanvas);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+            }
+            connectParticles();
+        }
+        
+        initParticles();
+        animateCanvas();
+
+
+        // --- 3. 3D TILT EFFECT LOGIC ---
+        const card = document.getElementById('tilt-card');
+        const glare = document.getElementById('card-glare');
+        const container = document.querySelector('.tilt-container');
+
+        container.addEventListener('mousemove', (e) => {
             const rect = card.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            card.style.setProperty('--mouse-x', `${x}px`);
-            card.style.setProperty('--mouse-y', `${y}px`);
-        })
-    "
-    class="min-h-screen cyber-grid transition-colors duration-700 overflow-x-hidden relative"
-    :class="darkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'">
-
-    <!-- INTERACTIVE THEME GATEWAY MODAL -->
-    <div x-show="!themeChosen" 
-         x-transition:enter="transition ease-out duration-500"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-3xl">
-        
-        <div class="supreme-glass p-8 sm:p-12 rounded-[3rem] shadow-2xl max-w-md w-full text-center space-y-6 relative overflow-hidden border border-sky-500/50">
-            <div class="absolute -top-24 -left-24 w-56 h-56 bg-sky-500/35 rounded-full blur-3xl pointer-events-none animate-pulse-glow"></div>
-            <div class="absolute -bottom-24 -right-24 w-56 h-56 bg-indigo-500/35 rounded-full blur-3xl pointer-events-none animate-pulse-glow"></div>
-
-            <div class="relative z-10 space-y-3">
-                <div class="inline-flex p-4 bg-gradient-to-tr from-sky-400 via-indigo-500 to-blue-600 rounded-3xl text-white text-4xl shadow-2xl animate-float font-outfit font-black">
-                    M
-                </div>
-                <h2 class="font-outfit text-3xl font-extrabold tracking-tight">MoestordRP Hub</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                    An CDID Roleplay Group &bull; Pilih pengalaman visual terbaik Anda:
-                </p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3.5 relative z-10">
-                <button @click="selectTheme('light')" 
-                    class="p-5 rounded-2xl bg-amber-50/90 hover:bg-amber-100 dark:bg-slate-900/90 dark:hover:bg-slate-800 border border-amber-200 dark:border-slate-800 text-slate-900 dark:text-white flex flex-col items-center gap-2 shadow-xl transition hover:scale-105">
-                    <span class="text-3xl">☀️</span>
-                    <span class="font-outfit font-bold text-xs">Light Mode</span>
-                </button>
-                <button @click="selectTheme('dark')" 
-                    class="p-5 rounded-2xl bg-slate-900 hover:bg-slate-800 dark:bg-gradient-to-tr dark:from-sky-600 dark:to-indigo-600 border border-slate-800 dark:border-sky-500 text-white flex flex-col items-center gap-2 shadow-xl transition hover:scale-105">
-                    <span class="text-3xl">🌙</span>
-                    <span class="font-outfit font-bold text-xs">Dark Mode</span>
-                </button>
-            </div>
-
-            <p class="text-[11px] text-slate-400 font-mono relative z-10">
-                ⚡ Tema dapat diganti kapan saja di dalam dashboard.
-            </p>
-        </div>
-    </div>
-
-    <!-- ZERO-SYNCED STABLE COUNTDOWN DISCORD GATEWAY MODAL -->
-    <div x-show="showDiscordModal" 
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100 scale-100"
-         x-transition:leave-end="opacity-0 scale-95"
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-2xl"
-         style="display: none;">
-        
-        <div class="supreme-glass p-8 sm:p-10 rounded-[3rem] shadow-2xl max-w-sm w-full text-center space-y-6 relative overflow-hidden border border-sky-500/50">
-            <div class="absolute -top-24 -left-24 w-56 h-56 bg-sky-500/30 rounded-full blur-3xl pointer-events-none animate-pulse-glow"></div>
-            <div class="absolute -bottom-24 -right-24 w-56 h-56 bg-indigo-500/30 rounded-full blur-3xl pointer-events-none animate-pulse-glow"></div>
+            // Calculate mouse position relative to the center of the card
+            const x = e.clientX - rect.left; 
+            const y = e.clientY - rect.top;
             
-            <div class="relative z-10 space-y-5">
-                <div class="relative w-32 h-32 mx-auto flex items-center justify-center">
-                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
-                        <circle cx="60" cy="60" r="50" stroke="currentColor" stroke-width="6" class="text-slate-800/80" fill="transparent"></circle>
-                        <circle cx="60" cy="60" r="50" stroke="url(#stableGradient)" stroke-width="6" 
-                                :style="`stroke-dasharray: 314.16; stroke-dashoffset: ${314.16 * (discordCountdown / 3)};`"
-                                stroke-linecap="round" fill="transparent" class="transition-all duration-1000 ease-linear"></circle>
-                        <defs>
-                            <linearGradient id="stableGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#38bdf8" />
-                                <stop offset="100%" stop-color="#6366f1" />
-                            </linearGradient>
-                        </defs>
-                    </svg>
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            // Calculate rotation (max 15 degrees)
+            const rotateX = ((y - centerY) / centerY) * -15;
+            const rotateY = ((x - centerX) / centerX) * 15;
 
-                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                        <template x-if="discordCountdown > 0">
-                            <div class="flex flex-col items-center animate-scale-in">
-                                <span class="font-outfit text-4xl font-black text-slate-900 dark:text-white tracking-tighter" x-text="discordCountdown"></span>
-                                <span class="text-[9px] font-mono text-sky-400 font-extrabold uppercase tracking-widest">Detik</span>
-                            </div>
-                        </template>
-                        <template x-if="discordCountdown === 0">
-                            <div class="flex flex-col items-center animate-scale-in">
-                                <span class="text-3xl">🚀</span>
-                                <span class="text-[10px] font-outfit text-emerald-400 font-black tracking-widest mt-0.5">SIAP</span>
-                            </div>
-                        </template>
-                    </div>
-                </div>
+            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            
+            // Glare effect
+            glare.style.opacity = '1';
+            glare.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.2) 0%, transparent 60%)`;
+        });
 
-                <div class="space-y-2">
-                    <h3 class="font-outfit text-xl font-black text-slate-900 dark:text-white tracking-tight">Do you wish to continue?</h3>
-                    <p class="text-xs text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
-                        Anda akan diarahkan menuju server resmi <strong class="text-sky-400 font-bold">MoestordRP Hub Discord</strong>.
-                    </p>
-                </div>
-            </div>
+        container.addEventListener('mouseleave', () => {
+            card.style.transform = `rotateX(0deg) rotateY(0deg)`;
+            glare.style.opacity = '0';
+        });
 
-            <div class="grid grid-cols-2 gap-3 relative z-10 pt-2">
-                <button @click="closeDiscordGateway()" 
-                    class="py-3.5 px-4 rounded-2xl bg-slate-200/80 dark:bg-slate-900/80 hover:bg-slate-300 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-outfit font-bold text-xs transition border border-slate-300 dark:border-slate-800 shadow-sm">
-                    Batal
-                </button>
-                <a :href="discordCountdown === 0 ? 'https://discord.gg/QmN7Su3Adm' : '#'" 
-                   :target="discordCountdown === 0 ? '_blank' : '_self'"
-                   @click="if(discordCountdown === 0) { closeDiscordGateway(); }"
-                   :class="discordCountdown > 0 ? 'opacity-40 cursor-not-allowed bg-slate-800 text-slate-500' : 'bg-gradient-to-r from-sky-500 via-indigo-600 to-blue-600 hover:opacity-95 shadow-xl shadow-sky-500/40 scale-105 text-white animate-pulse'"
-                   class="py-3.5 px-4 rounded-2xl font-outfit font-extrabold text-xs flex items-center justify-center gap-2 transition duration-300 border border-sky-400/50">
-                    <span>Masuk</span>
-                    <span class="text-sm">→</span>
-                </a>
-            </div>
-        </div>
-    </div>
 
-    <!-- MAIN DASHBOARD CONTENT -->
-    <div x-show="themeChosen" x-cloak class="min-h-screen flex flex-col relative z-10">
+        // --- 4. COUNTDOWN & BUTTON LOGIC ---
+        let timeLeft = 5;
+        const actionBtn = document.getElementById('actionBtn');
+        const timerText = document.getElementById('timerText');
+        const btnContent = document.getElementById('btnContent');
 
-        <!-- RUNNING TEXT TICKER -->
-        <div class="bg-gradient-to-r from-sky-600 via-indigo-600 to-blue-700 text-white text-xs font-bold py-3 overflow-hidden whitespace-nowrap shadow-2xl relative z-50 tracking-wider font-mono">
-            <div class="inline-block animate-marquee uppercase">
-                🔥 OFFICIAL MOESTORDRP HUB &bull; AN CDID ROLEPLAY GROUP &bull; IKUTI SEMUA RULES IN-GAME & DISCORD &bull; DRIVE SAFELY & RESPECT OTHERS &bull; REKOMENDASI DEVICE MEDIUM-HIGH END &bull; 🔥 OFFICIAL MOESTORDRP HUB &bull; AN CDID ROLEPLAY GROUP &bull; IKUTI SEMUA RULES IN-GAME & DISCORD &bull; DRIVE SAFELY & RESPECT OTHERS &bull; REKOMENDASI DEVICE MEDIUM-HIGH END &bull;
-            </div>
-        </div>
-
-        <!-- AMBIENT COSMIC AURORA BLOBS -->
-        <div class="absolute top-24 left-10 w-[600px] h-[600px] bg-sky-500/25 rounded-full blur-[160px] pointer-events-none animate-aurora-1"></div>
-        <div class="absolute top-1/3 right-10 w-[600px] h-[600px] bg-indigo-500/25 rounded-full blur-[160px] pointer-events-none animate-aurora-2"></div>
-        <div class="absolute bottom-10 left-1/4 w-[700px] h-[700px] bg-blue-600/20 rounded-full blur-[180px] pointer-events-none animate-pulse-glow"></div>
-
-        <!-- TOP NAVBAR -->
-        <header class="sticky top-0 z-40 supreme-glass border-b shadow-lg">
-            <div class="max-w-7xl mx-auto px-4 sm:px-10 h-20 sm:h-24 flex items-center justify-between gap-4">
+        const countdown = setInterval(() => {
+            timeLeft--;
+            if (timeLeft > 0) {
+                timerText.innerText = timeLeft;
+            } else {
+                clearInterval(countdown);
                 
-                <!-- Brand -->
-                <div class="flex items-center space-x-3 sm:space-x-4 group cursor-pointer hover:scale-105 transition min-w-0" @click="playSfx('click')">
-                    <div class="relative shrink-0">
-                        <div class="absolute -inset-2.5 bg-gradient-to-r from-sky-400 to-indigo-600 rounded-2xl blur-lg opacity-80 group-hover:opacity-100 transition animate-pulse-glow"></div>
-                        <div class="relative w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-tr from-sky-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-xl sm:text-2xl font-outfit font-black shadow-xl group-hover:rotate-12 transition duration-500">
-                            M
-                        </div>
-                    </div>
-                    <div class="min-w-0">
-                        <h1 class="font-outfit font-extrabold text-base sm:text-2xl tracking-tight text-slate-900 dark:text-white flex items-center gap-2 truncate">
-                            <span class="truncate">MoestordRP Hub</span>
-                            <span class="text-[9px] sm:text-[10px] font-mono font-extrabold px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/40 uppercase tracking-widest shrink-0 shadow-sm">OFFICIAL</span>
-                        </h1>
-                        <p class="text-[11px] sm:text-xs text-slate-500 font-medium truncate">An CDID Roleplay Group</p>
-                    </div>
-                </div>
+                // Enable Button
+                actionBtn.disabled = false;
+                actionBtn.classList.remove('cursor-not-allowed', 'bg-gray-400/20', 'dark:bg-black/40', 'text-gray-500', 'dark:text-gray-600', 'border-transparent');
+                
+                // Add Cyberpunk Active Styles
+                actionBtn.classList.add('active', 'bg-black/50', 'dark:bg-black/80', 'text-white', 'cursor-pointer');
+                
+                // Change Content
+                btnContent.innerHTML = `
+                    <svg class="w-6 h-6 mr-2 text-neon-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    REFRESH
+                `;
+                
+                playSound('ready');
+            }
+        }, 1000);
 
-                <!-- Controls -->
-                <div class="flex items-center gap-2.5 sm:gap-4 shrink-0">
-                    
-                    <!-- ADVANCED SFX BUTTON WITH HOVER / DOUBLE-TAP VOLUME SLIDER -->
-                    <div class="relative" 
-                         @mouseenter="showVolumeSlider = true" 
-                         @mouseleave="showVolumeSlider = false">
-                         
-                        <button @click="sfxEnabled = !sfxEnabled; playSfx('click')" 
-                            @dblclick="showVolumeSlider = !showVolumeSlider"
-                            class="px-3.5 sm:px-4.5 py-2.5 rounded-xl sm:rounded-2xl bg-slate-200/80 dark:bg-slate-800/80 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300/60 dark:border-slate-700/60 flex items-center gap-1.5 text-[11px] sm:text-xs font-mono font-bold transition shadow-sm hover:border-sky-500/60 select-none">
-                            <span x-text="sfxEnabled ? '🔊 SFX' : '🔇 SFX'"></span>
-                        </button>
+        // Button Click Handler
+        actionBtn.addEventListener('click', () => {
+            playSound('warp');
+            
+            const overlay = document.getElementById('success-overlay');
+            const content = document.getElementById('success-content');
+            
+            overlay.classList.add('show');
+            
+            // Trigger pop-in animation
+            setTimeout(() => {
+                content.classList.remove('scale-50', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 50);
 
-                        <!-- VOLUME POPUP SLIDER -->
-                        <div x-show="showVolumeSlider" 
-                             x-transition:enter="transition ease-out duration-200 transform"
-                             x-transition:enter-start="opacity-0 scale-95 translate-y-2"
-                             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                             x-transition:leave="transition ease-in duration-150 transform"
-                             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                             x-transition:leave-end="opacity-0 scale-95 translate-y-2"
-                             class="absolute right-0 top-full mt-2 w-48 supreme-glass p-3.5 rounded-2xl shadow-2xl border border-sky-500/40 z-50 space-y-2"
-                             style="display: none;">
-                            <div class="flex justify-between items-center text-[10px] font-mono font-bold text-slate-700 dark:text-slate-300">
-                                <span>Volume SFX</span>
-                                <span class="text-sky-400" x-text="sfxVolume + '%'"></span>
-                            </div>
-                            <input type="range" min="50" max="100" step="1" 
-                                   :value="sfxVolume" 
-                                   @input="updateVolume($event.target.value)"
-                                   class="w-full accent-sky-500 cursor-pointer h-1.5 bg-slate-700 rounded-lg">
-                            <div class="text-[9px] font-mono text-slate-600 dark:text-slate-400 text-center">
-                                Tap 2x di HP / Hover di PC
-                            </div>
-                        </div>
-                    </div>
+            // Reload page after sequence
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+        });
 
-                    <!-- ULTRA INERTIAL SMOOTH FULLSCREEN EMOJI THEME TOGGLE SWITCH -->
-                    <div @click="toggleTheme()" 
-                         class="theme-switch relative flex items-center p-1 select-none border shadow-xl overflow-hidden"
-                         :class="darkMode ? 'bg-slate-950 border-slate-800' : 'bg-sky-200 border-sky-300'"
-                         title="Ganti Tema">
-                        
-                        <!-- Random Scattered Background Elements (Stars for Dark, Clouds for Light) -->
-                        <div class="absolute inset-0 pointer-events-none overflow-hidden transition-opacity duration-700">
-                            <template x-if="darkMode">
-                                <div class="w-full h-full relative opacity-70">
-                                    <span class="absolute text-[7px] top-1 left-3 animate-pulse">✨</span>
-                                    <span class="absolute text-[9px] top-4 left-7">⭐</span>
-                                    <span class="absolute text-[6px] bottom-1 left-5 animate-pulse">✨</span>
-                                    <span class="absolute text-[8px] top-2 left-11">⭐</span>
-                                </div>
-                            </template>
-                            <template x-if="!darkMode">
-                                <div class="w-full h-full relative opacity-90">
-                                    <span class="absolute text-[10px] top-1 right-3">☁️</span>
-                                    <span class="absolute text-[7px] bottom-1 right-7">☁️</span>
-                                </div>
-                            </template>
-                        </div>
 
-                        <!-- Fullscreen Emoji Thumb (Sun / Moon) with Inertial Damping -->
-                        <div class="w-8 h-8 rounded-full shadow-lg flex items-center justify-center transform transition-all duration-[900ms] ease-[cubic-bezier(0.25,1,0.5,1)] z-10"
-                             :class="darkMode ? 'translate-x-[46px] bg-amber-200 text-amber-950 shadow-amber-500/30 rotate-[360deg]' : 'translate-x-0 bg-amber-400 text-white shadow-amber-400/50 rotate-0'">
-                            <span class="text-lg leading-none transform transition-transform duration-700" x-text="darkMode ? '🌕' : '☀️'"></span>
-                        </div>
-                    </div>
+        // --- 5. THEME TOGGLE LOGIC ---
+        const themeBtn = document.getElementById('theme-toggle');
+        const sunIcon = document.getElementById('sun-icon');
+        const moonIcon = document.getElementById('moon-icon');
+        const htmlElement = document.documentElement;
 
-                </div>
-            </div>
-        </header>
-
-        <!-- MAIN CONTAINER -->
-        <main class="max-w-5xl mx-auto px-4 sm:px-8 py-10 sm:py-14 relative z-10 flex-grow w-full">
-
-            <!-- HERO HEADER -->
-            <div class="text-center mb-10 sm:mb-12 space-y-3 sm:space-y-4">
-                <span class="inline-flex items-center gap-2 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-mono font-extrabold bg-sky-500/10 text-sky-400 border border-sky-500/40 shadow-lg">
-                    ✨ OFFICIAL MOESTORDRP HUB ✨
-                </span>
-                <h2 class="font-outfit text-3xl sm:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
-                    Pusat Informasi & Peraturan <br>
-                    <span class="bg-gradient-to-r from-sky-400 via-indigo-400 to-blue-500 bg-clip-text text-transparent drop-shadow-md">
-                        MoestordRP Hub
-                    </span>
-                </h2>
-                <p class="text-slate-600 dark:text-slate-400 max-w-xl mx-auto text-xs sm:text-base font-medium px-2">
-                    Jelajahi dunia roleplay imersif dengan standar realisme tertinggi, tata tertib operasional, dan komunitas profesional.
-                </p>
-            </div>
-
-            <!-- SLIDING PILL TAB NAVIGATION (ABSOLUTELY CLEAN SHADOW-FREE BAR) -->
-            <div class="flex justify-center mb-10 sm:mb-12 overflow-x-auto py-3">
-                <div class="clean-nav-glass p-2 sm:p-2.5 rounded-[2.5rem] sm:rounded-full relative flex items-center w-full max-w-2xl min-w-[320px] overflow-hidden">
-                    
-                    <!-- Absolute Sliding Pill Indicator with Inertial Smooth Damping -->
-                    <div class="absolute h-[calc(100%-16px)] top-2 rounded-full bg-gradient-to-r from-sky-500 to-indigo-600 shadow-md shadow-sky-500/40 transition-all duration-[700ms] ease-[cubic-bezier(0.25,1,0.5,1)] z-0"
-                         :style="activeTab === 'pendahuluan' ? 'left: 8px; width: calc(25% - 6px);' : 
-                                 activeTab === 'rules' ? 'left: calc(25% + 3px); width: calc(25% - 6px);' : 
-                                 activeTab === 'recruitment' ? 'left: calc(50% + 3px); width: calc(25% - 6px);' : 
-                                 'left: calc(75% + 3px); width: calc(25% - 9px);'">
-                    </div>
-
-                    <button @click="switchTab('pendahuluan')"
-                        :class="activeTab === 'pendahuluan' ? 'text-white font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-                        class="flex-1 py-3 sm:py-3.5 text-[11px] sm:text-sm font-outfit relative z-10 transition-colors text-center truncate px-1">
-                        Pendahuluan
-                    </button>
-                    <button @click="switchTab('rules')"
-                        :class="activeTab === 'rules' ? 'text-white font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-                        class="flex-1 py-3 sm:py-3.5 text-[11px] sm:text-sm font-outfit relative z-10 transition-colors text-center truncate px-1">
-                        Rules
-                    </button>
-                    <button @click="switchTab('recruitment')"
-                        :class="activeTab === 'recruitment' ? 'text-white font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-                        class="flex-1 py-3 sm:py-3.5 text-[11px] sm:text-sm font-outfit relative z-10 transition-colors text-center truncate px-1">
-                        Recruitment
-                    </button>
-                    <button @click="switchTab('session')"
-                        :class="activeTab === 'session' ? 'text-white font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-                        class="flex-1 py-3 sm:py-3.5 text-[11px] sm:text-sm font-outfit relative z-10 transition-colors text-center truncate px-1">
-                        Session
-                    </button>
-                </div>
-            </div>
-
-            <!-- TAB CONTENT VIEWS -->
-            <div class="relative w-full">
-
-                <!-- 1. PENDAHULUAN (5 POIN LENGKAP & PADAT) -->
-                <div x-show="activeTab === 'pendahuluan'" 
-                     x-transition:enter="transition ease-out duration-500 transform"
-                     x-transition:enter-start="opacity-0 translate-y-6 scale-95"
-                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                     class="supreme-glass rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-12 shadow-2xl space-y-6 sm:space-y-8 relative overflow-hidden border border-sky-500/30 spotlight-card">
-                    
-                    <div class="border-b border-slate-200/80 dark:border-slate-800 pb-5 sm:pb-6 relative z-10">
-                        <h3 class="font-outfit text-xl sm:text-4xl font-black flex items-center gap-3.5 text-slate-900 dark:text-white">
-                            <span class="p-2.5 sm:p-3 bg-sky-500/15 rounded-2xl text-sky-400 text-lg sm:text-xl shadow-inner border border-sky-500/40 shrink-0">💡</span>
-                            <span class="leading-snug">Panduan Lengkap & Filosofi MoestordRP Hub</span>
-                        </h3>
-                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2 font-medium">Dokumen panduan resmi operasional komunitas roleplay berbasis An CDID Roleplay Group.</p>
-                    </div>
-
-                    <div class="space-y-4 sm:space-y-5 text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium leading-relaxed relative z-10">
-                        <!-- Poin 1 -->
-                        <div class="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-sky-500/5 border border-sky-500/20 flex items-start gap-4 shadow-sm">
-                            <span class="text-2xl sm:text-3xl shrink-0">🏙️</span>
-                            <div class="space-y-1.5">
-                                <h4 class="font-outfit font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">1. Definisi & Konsep Dasar MoestordRP Hub</h4>
-                                <p class="text-xs sm:text-sm">
-                                    <strong class="text-sky-400 font-bold">MoestordRP Hub</strong> adalah pelopor server roleplay imersif di bawah naungan <strong class="text-slate-900 dark:text-white font-bold">An CDID Roleplay Group</strong> pada platform Roblox. Server ini dirancang secara khusus untuk menghadirkan tiruan kehidupan perkotaan CDID yang dinamis, interaktif, dan sangat realistis.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Poin 2 -->
-                        <div class="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-indigo-500/5 border border-indigo-500/20 flex items-start gap-4 shadow-sm">
-                            <span class="text-2xl sm:text-3xl shrink-0">🎭</span>
-                            <div class="space-y-1.5">
-                                <h4 class="font-outfit font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">2. Esensi Pendalaman Karakter (Roleplay Immersion)</h4>
-                                <p class="text-xs sm:text-sm">
-                                    Inti dari pengalaman bermain di MoestordRP Hub adalah komitmen penuh terhadap karakter fiktif Anda (<em class="text-indigo-400 font-semibold">In-Character / IC</em>). Ambil peran sebagai warga sipil, pengemudi angkutan, mekanik, hingga aparat penegak hukum dan medis dengan penuh penghayatan.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Poin 3 -->
-                        <div class="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-sky-500/5 border border-sky-500/20 flex items-start gap-4 shadow-sm">
-                            <span class="text-2xl sm:text-3xl shrink-0">⚖️</span>
-                            <div class="space-y-1.5">
-                                <h4 class="font-outfit font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">3. Kepatuhan Mutlak Terhadap Peraturan</h4>
-                                <p class="text-xs sm:text-sm">
-                                    Seluruh warga sesi wajib mematuhi ketentuan <strong class="text-sky-400 font-bold">In-Game Rules</strong> dan <strong class="text-sky-400 font-bold">Discord Etiquette</strong> tanpa terkecuali. Hal ini diberlakukan untuk menjamin kenyamanan bersama dan mencegah tindakan toksik yang merusak ekosistem roleplay.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Poin 4 -->
-                        <div class="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-indigo-500/5 border border-indigo-500/20 flex items-start gap-4 shadow-sm">
-                            <span class="text-2xl sm:text-3xl shrink-0">🤝</span>
-                            <div class="space-y-1.5">
-                                <h4 class="font-outfit font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">4. Profesionalisme & Kolaborasi Komunitas</h4>
-                                <p class="text-xs sm:text-sm">
-                                    Komunitas ini dibangun di atas fondasi rasa saling menghormati antar pemain maupun pengurus (Staff). Kerja sama yang baik antar faksi dan warga sipil akan menciptakan alur cerita kota yang hidup dan berkesan.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Poin 5 -->
-                        <div class="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-sky-500/5 border border-sky-500/20 flex items-start gap-4 shadow-sm">
-                            <span class="text-2xl sm:text-3xl shrink-0">🚀</span>
-                            <div class="space-y-1.5">
-                                <h4 class="font-outfit font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">5. Visi & Pengembangan Berkelanjutan</h4>
-                                <p class="text-xs sm:text-sm">
-                                    MoestordRP Hub terus berinovasi dalam menghadirkan sesi berkualitas tinggi. Masukan dan partisipasi aktif Anda di dalam server Discord sangat berharga bagi kemajuan dan masa depan komunitas kita bersama.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="pt-4 flex justify-end relative z-10">
-                        <button @click="switchTab('rules'); switchRuleTab('ingame')" 
-                            class="w-full sm:w-auto px-6 sm:px-8 py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:opacity-95 text-white font-outfit font-extrabold text-xs sm:text-sm flex items-center justify-center gap-3 shadow-2xl shadow-sky-500/30 transition hover:scale-105 border border-sky-400/50">
-                            <span>Lanjut ke Rules In-Game</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 2. RULES -->
-                <div x-show="activeTab === 'rules'" 
-                     x-transition:enter="transition ease-out duration-500 transform"
-                     x-transition:enter-start="opacity-0 translate-y-6 scale-95"
-                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                     class="space-y-6 sm:space-y-8">
-                    
-                    <!-- Sub-Tab Rules Pill -->
-                    <div class="flex justify-center flex-wrap gap-2">
-                        <div class="supreme-glass p-1.5 sm:p-2 rounded-2xl flex gap-1.5 shadow-2xl w-full max-w-md border border-sky-500/40">
-                            <button @click="switchRuleTab('ingame')"
-                                :class="activeRuleTab === 'ingame' ? 'bg-sky-500 text-white font-extrabold shadow-lg shadow-sky-500/40' : 'text-slate-600 dark:text-slate-400'"
-                                class="flex-1 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm transition font-outfit text-center truncate">
-                                In-Game
-                            </button>
-                            <button @click="switchRuleTab('bannedcars')"
-                                :class="activeRuleTab === 'bannedcars' ? 'bg-rose-500 text-white font-extrabold shadow-lg shadow-rose-500/40' : 'text-slate-600 dark:text-slate-400'"
-                                class="flex-1 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm transition font-outfit text-center truncate">
-                                Banned Cars
-                            </button>
-                            <button @click="switchRuleTab('discord')"
-                                :class="activeRuleTab === 'discord' ? 'bg-sky-500 text-white font-extrabold shadow-lg shadow-sky-500/40' : 'text-slate-600 dark:text-slate-400'"
-                                class="flex-1 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm transition font-outfit text-center truncate">
-                                Discord
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- In-Game Rules Grid -->
-                    <div x-show="activeRuleTab === 'ingame'" 
-                         x-transition:enter="transition ease-out duration-400 transform"
-                         x-transition:enter-start="opacity-0 translate-y-4"
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 items-start">
-                        
-                        <template x-for="(rule, index) in [
-                            {id: 'ig-1', icon: '🚦', title: 'Realistic Driving', desc: 'Patuhi rambu, lampu lalu lintas, marka jalan, dan berkendara dengan wajar.', detail: 'Wajib berhenti di garis lampu merah, menyalakan lampu sen saat berbelok atau berpindah jalur, serta dilarang memotong jalan pengendara lain secara ugal-ugalan demi menjaga realisme lalu lintas server CDID.'},
-                            {id: 'ig-2', icon: '💥', title: 'No CR (Car Ramming)', desc: 'Dilarang menabrak kendaraan lain tanpa alasan RP yang jelas.', detail: 'Tindakan sengaja menabrak mobil player lain (seperti pakai Tokoma Avanza atau Lahkokgini Tempestra) untuk merusak bodi tanpa dialog RP yang sah akan dikenakan sanksi tegas.'},
-                            {id: 'ig-3', icon: '🛡️', title: 'No FRP', desc: 'Dilarang melakukan tindakan yang tidak masuk akal dalam roleplay.', detail: 'Force RolePlay / Failing to Value Life (FRP) meliputi aksi melompat dari jembatan tinggi, membawa mobil dengan 4 ban pecah kecepatan tinggi, atau mengabaikan todongan senjata.'},
-                            {id: 'ig-4', icon: '🤝', title: 'Respect All Players', desc: 'Dilarang toxic, menghina, spam, atau mengganggu pemain lain.', detail: 'Setiap peserta sesi wajib menjunjung tinggi sportivitas. Dilarang melontarkan kata-kata kotor atau merendahkan fisik pemain lain di chat in-game maupun voice chat.'},
-                            {id: 'ig-5', icon: '⚔️', title: 'No RDM (Random Deathmatch)', desc: 'Dilarang menyerang atau membunuh pemain tanpa alasan RP.', detail: 'Anda tidak diperkenankan memukul atau menembak player lain secara acak tanpa adanya latar belakang konflik, ancaman, atau investigasi faksi yang jelas.'},
-                            {id: 'ig-6', icon: '👮‍♂️', title: 'Follow Staff', desc: 'Keputusan Host, Co-Host, dan Moderator wajib dihormati.', detail: 'Apabila staff memberikan instruksi, pengalihan rute konvoi, atau teguran di dalam sesi, seluruh peserta wajib mematuhi instruksi tersebut demi kelancaran acara.'},
-                            {id: 'ig-7', icon: '⚡', title: 'No Exploiting', desc: 'Dilarang menggunakan bug, glitch, atau exploit untuk keuntungan sendiri.', detail: 'Segala bentuk eksploitasi celah game CDID (seperti menembus tembok, menduplikasi uang/item, atau mempercepat mobil di luar batas normal) berujung banned permanen.'},
-                            {id: 'ig-8', icon: '🅿️', title: 'Proper Parking', desc: 'Parkir di tempat yang sesuai dan jangan menghalangi jalan.', detail: 'Saat berhenti atau meninggalkan kendaraan, posisikan kendaraan di area parkir resmi atau pinggir jalan yang aman, jangan menutup akses jalan utama.'},
-                            {id: 'ig-9', icon: '🔗', title: 'Use AORP Properly', desc: 'AORP hanya digunakan untuk keperluan RP, bukan untuk menghindari aturan.', detail: 'Area of Roleplay (AORP) wajib dihormati batasannya. Jangan menyalahgunakan status AORP untuk lari dari tanggung jawab hukum in-game.'},
-                            {id: 'ig-10', icon: '🌟', title: 'Keep RP Alive', desc: 'Utamakan kenyamanan, keseruan, dan kualitas roleplay bersama.', detail: 'Dukung alur cerita yang sedang berjalan, bangun interaksi yang kreatif dengan warga lain, dan jadikan sesi MoestordRP Hub sebagai tempat bersenang-senang yang imersif.'}
-                        ]" :key="rule.id">
-                            <div @click="toggleRule(rule.id)" class="supreme-glass p-5 sm:p-7 rounded-3xl shadow-xl flex flex-col justify-between space-y-4 border border-sky-500/25 spotlight-card cursor-pointer group">
-                                <div class="flex items-center justify-between gap-3">
-                                    <div class="flex items-center gap-3.5 min-w-0">
-                                        <div class="w-11 h-11 sm:w-12 sm:h-12 bg-sky-500/15 rounded-2xl flex items-center justify-center text-lg sm:text-xl shadow-inner border border-sky-500/30 group-hover:scale-110 transition shrink-0" x-text="rule.icon"></div>
-                                        <h4 class="font-outfit text-sm sm:text-lg font-extrabold text-slate-900 dark:text-white leading-snug truncate" x-text="rule.title"></h4>
-                                    </div>
-                                    <span class="text-[11px] sm:text-xs font-mono text-sky-400 font-bold bg-sky-500/10 px-2.5 sm:px-3 py-1.5 rounded-full border border-sky-500/30 shadow-sm shrink-0" x-text="openRule === rule.id ? 'Tutup ▲' : 'Detail ▼'"></span>
-                                </div>
-                                <p class="text-slate-600 dark:text-slate-400 text-xs sm:text-sm leading-relaxed font-medium" x-text="rule.desc"></p>
-                                <div class="accordion-content" :class="openRule === rule.id ? 'is-open' : ''">
-                                    <div class="accordion-inner">
-                                        <div class="pt-4 mt-2 border-t border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-1.5 bg-sky-500/10 p-3.5 sm:p-4 rounded-2xl border border-sky-500/30 shadow-inner">
-                                            <p><strong>Penjelasan Detail:</strong> <span x-text="rule.detail"></span></p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-
-                    </div>
-
-                    <!-- BANNED CARS TAB -->
-                    <div x-show="activeRuleTab === 'bannedcars'" 
-                         x-transition:enter="transition ease-out duration-400 transform"
-                         x-transition:enter-start="opacity-0 translate-y-4"
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         class="supreme-glass p-6 sm:p-10 rounded-3xl sm:rounded-[2.5rem] shadow-2xl space-y-6 sm:space-y-8 border border-rose-500/40 spotlight-card">
-                        
-                        <div class="border-b border-slate-200/80 dark:border-slate-800 pb-5 sm:pb-6 relative z-10">
-                            <h3 class="font-outfit text-xl sm:text-3xl font-black flex items-center gap-3.5 text-slate-900 dark:text-white">
-                                <span class="p-2.5 sm:p-3 bg-rose-500/15 rounded-2xl text-rose-400 text-lg sm:text-xl shadow-inner border border-rose-500/40 shrink-0">🚫</span>
-                                <span class="leading-snug">In-Session Banned Car</span>
-                            </h3>
-                            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2 font-medium">Klik pada setiap kategori untuk melihat contoh mobil CDID yang dilarang beserta penjelasannya:</p>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 relative z-10 text-xs sm:text-sm font-medium items-start">
-                            
-                            <template x-for="(bc, index) in [
-                                {id: 'bc-1', title: 'Hypercar & Supercar CDID', desc: 'Contoh yang dilarang: Lahkokgini Tempestra, Lahkokgini Celestaurus, Atruse R8, McSena 720S, Flores Mustang. Mobil kecepatan ekstrem merusak ritme roleplay kota santai.'},
-                                {id: 'bc-2', title: 'Kendaraan Harga > $2.5M', desc: 'Mobil dengan valuasi harga in-game di atas $2.5M (seperti Henry-Rolls Phantom atau Mullbach 57/62) dilarang digunakan untuk menjaga kesetaraan ekonomi.'},
-                                {id: 'bc-3', title: 'Kendaraan Event / Limited Khusus', desc: 'Mobil edisi terbatas event tertentu (seperti edisi spesial Hari Raya atau Weekly Drop langka) tidak diizinkan dipakai di sesi reguler.'},
-                                {id: 'bc-4', title: 'Strobo & Siren Wajib Job Resmi', desc: 'Penggunaan lampu strobo atau sirine HANYA diizinkan untuk faksi resmi in-game, seperti Suzi D-Max Police, Tokoma Land Cruiser Ambulance, atau Hyunson Palisade Medis. Warga sipil dilarang keras memasang strobo/sirine.'},
-                                {id: 'bc-5', title: 'Kendaraan Tidak Sesuai Tema Session', desc: 'Jika tema host adalah kendaraan harian standar / niaga (seperti Mestibis Canter, Tokoma Kijang, Densu GranMax), membawa mobil sport/modifikasi ekstrem melanggar aturan.'},
-                                {id: 'bc-6', title: 'Digunakan untuk Trolling / Car Ramming', desc: 'Kendaraan jenis apapun yang dipakai sengaja untuk menabrak kerumunan atau membuat kekacauan non-RP akan langsung disita dan diremove dari sesi.'}
-                            ]" :key="bc.id">
-                                <div @click="toggleRule(bc.id)" class="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-rose-500/5 border border-rose-500/30 flex flex-col gap-3 shadow-sm cursor-pointer group hover:bg-rose-500/10 transition">
-                                    <div class="flex items-center justify-between gap-3">
-                                        <div class="flex items-center gap-3 min-w-0">
-                                            <span class="text-rose-500 text-base font-bold shrink-0">✖</span>
-                                            <span class="text-slate-800 dark:text-slate-200 font-extrabold truncate" x-text="bc.title"></span>
-                                        </div>
-                                        <span class="text-[10px] sm:text-[11px] font-mono text-rose-400 bg-rose-500/15 px-2.5 sm:px-3 py-1 rounded-full border border-rose-500/30 font-bold shrink-0" x-text="openRule === bc.id ? 'Tutup ▲' : 'Detail ▼'"></span>
-                                    </div>
-                                    <div class="accordion-content" :class="openRule === bc.id ? 'is-open' : ''">
-                                        <div class="accordion-inner">
-                                            <div class="pt-3 mt-1 border-t border-rose-500/30 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
-                                                <p x-text="bc.desc"></p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-
-                        </div>
-                    </div>
-
-                    <!-- Discord Rules Grid & Ultimate Join Discord Button -->
-                    <div x-show="activeRuleTab === 'discord'" 
-                         x-transition:enter="transition ease-out duration-400 transform"
-                         x-transition:enter-start="opacity-0 translate-y-4"
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         class="space-y-8">
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 items-start">
-                            <template x-for="(dc, index) in [
-                                {id: 'dc-1', icon: '🤝', title: 'Sopan Santun Publik', desc: 'Jaga ketikan di channel publik. Dilarang keras melakukan SARA, menghina fisik, atau melontarkan toxic behavior.', detail: 'Lingkungan Discord harus tetap ramah dan inklusif. Segala bentuk ucapan rasis, diskriminatif, atau serangan personal antar member berakibat mute hingga ban.'},
-                                {id: 'dc-2', icon: '📁', title: 'Gunakan Channel Tepat', desc: 'Bahas hal umum di general, jual-beli di trade, serta laporkan bug atau pelanggaran melalui tiket resmi.', detail: 'Patuhi peruntukan tiap channel teks. Jangan mengirim meme di channel laporan atau mengirim chat obrolan di channel pengumuman resmi.'},
-                                {id: 'dc-3', icon: '⚡', title: 'Hindari Spam & Provokasi', desc: 'Dilarang spam chat, capslock berlebihan, atau memicu perdebatan yang merusak keharmonisan.', detail: 'Mengirim pesan berulang kali (flood), menggunakan huruf kapital seluruhnya untuk memicu keributan, atau sengaja memancing emosi member lain dilarang keras.'},
-                                {id: 'dc-4', icon: '👮‍♂️', title: 'Hormati Staff', desc: 'Patuhi arahan moderator atau admin. Ajukan banding (appeal) secara sopan melalui privat ticket.', detail: 'Jika Anda mendapat sanksi atau peringatan, diskusikan secara baik-baik melalui tiket privat dengan staff. Jangan mendebat keputusan staff di channel publik.'},
-                                {id: 'dc-5', icon: '🚫', title: 'No NSFW & Gore', desc: 'Dilarang keras membagikan konten dewasa, berbau pornografi, kekerasan ekstrem, atau hal senonoh lainnya.', detail: 'Server ini ramah untuk semua kalangan usia member. Pengiriman gambar, stiker, atau link berbau NSFW/Gore mendatangkan hukuman pembersihan langsung (perma-ban).'},
-                                {id: 'dc-6', icon: '🔗', title: 'No Unauthorized Links', desc: 'Dilarang mengirim tautan phising, iklan server lain, atau link mencurigakan tanpa izin manajemen.', detail: 'Promosi server Discord lain atau penyebaran link eksternal berbahaya tanpa persetujuan owner/admin dikategorikan sebagai pelanggaran berat.'},
-                                {id: 'dc-7', icon: '🏷️', title: 'Proper Display Name', desc: 'Gunakan nama profil dan foto avatar yang wajar, mudah dibaca, serta tidak mengandung unsur penghinaan.', detail: 'Hindari penggunaan nama kosong, karakter tak terlihat, atau nickname yang menyerupai nama staff untuk menghindari penipuan identitas di komunitas.'},
-                                {id: 'dc-8', icon: '🎙️', title: 'Voice Channel Etiquette', desc: 'Jangan menggunakan soundboard berlebihan, teriak-teriak, atau memutar musik di voice channel publik.', detail: 'Hargai kenyamanan member lain di voice room. Jika mikrofon Anda berdengung atau bising, gunakan fitur push-to-talk atau mute mandiri.'},
-                                {id: 'dc-9', icon: '⚠️', title: 'No Ping Abuse', desc: 'Dilarang melakukan mention (@) berulang kali kepada Administrator atau Moderator tanpa keperluan penting.', detail: 'Mention staff hanya boleh dilakukan saat membuat tiket atau melaporkan darurat mutlak. Tagging staff sembarangan di general chat akan dikenakan sanksi mute.'},
-                                {id: 'dc-10', icon: '💡', title: 'Constructive Feedback', desc: 'Sampaikan kritik dan saran untuk kemajuan server melalui channel atau tiket khusus dengan bahasa sopan.', detail: 'Kami sangat terbuka terhadap masukan membangun dari komunitas. Salurkan ide perbaikan server melalui jalur formal yang telah disediakan pengurus.'}
-                            ]" :key="dc.id">
-                                <div @click="toggleRule(dc.id)" class="supreme-glass p-5 sm:p-7 rounded-3xl shadow-xl flex flex-col justify-between space-y-4 border border-sky-500/25 spotlight-card cursor-pointer group">
-                                    <div class="flex items-center justify-between gap-3">
-                                        <div class="flex items-center gap-3.5 min-w-0">
-                                            <div class="w-11 h-11 sm:w-12 sm:h-12 bg-sky-500/15 rounded-2xl flex items-center justify-center text-lg sm:text-xl shadow-inner border border-sky-500/30 group-hover:scale-110 transition shrink-0" x-text="dc.icon"></div>
-                                            <h4 class="font-outfit text-sm sm:text-lg font-extrabold text-slate-900 dark:text-white leading-snug truncate" x-text="dc.title"></h4>
-                                        </div>
-                                        <span class="text-[11px] sm:text-xs font-mono text-sky-400 font-bold bg-sky-500/10 px-2.5 sm:px-3 py-1.5 rounded-full border border-sky-500/30 shadow-sm shrink-0" x-text="openRule === dc.id ? 'Tutup ▲' : 'Detail ▼'"></span>
-                                    </div>
-                                    <p class="text-slate-600 dark:text-slate-400 text-xs sm:text-sm leading-relaxed font-medium" x-text="dc.desc"></p>
-                                    <div class="accordion-content" :class="openRule === dc.id ? 'is-open' : ''">
-                                        <div class="accordion-inner">
-                                            <div class="pt-4 mt-2 border-t border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-1.5 bg-sky-500/10 p-3.5 sm:p-4 rounded-2xl border border-sky-500/30 shadow-inner">
-                                                <p><strong>Penjelasan Detail:</strong> <span x-text="dc.detail"></span></p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-
-                        <!-- ULTIMATE JOIN DISCORD BUTTON -->
-                        <div class="pt-6 flex flex-col items-center justify-center">
-                            <button @click="openDiscordGateway()" 
-                                class="relative group overflow-hidden rounded-3xl p-px font-outfit font-black shadow-2xl shadow-indigo-500/30 transition-all duration-300 hover:scale-105 active:scale-95 w-full sm:w-auto">
-                                <span class="absolute inset-0 bg-gradient-to-r from-sky-400 via-indigo-500 to-blue-600 rounded-3xl animate-pulse-glow"></span>
-                                <div class="relative px-8 sm:px-12 py-5 rounded-3xl bg-slate-950/80 dark:bg-slate-900/90 backdrop-blur-xl flex items-center justify-center gap-4 text-white border border-sky-500/40 group-hover:bg-transparent transition duration-300">
-                                    <div class="w-10 h-10 rounded-2xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-xl text-sky-400 shadow-inner">
-                                        💬
-                                    </div>
-                                    <div class="text-left">
-                                        <div class="text-sm sm:text-base font-extrabold tracking-tight">Join Official Discord</div>
-                                        <div class="text-[11px] font-mono text-sky-400 font-semibold tracking-wider">MoestordRP Hub Community</div>
-                                    </div>
-                                    <span class="text-xl text-sky-400 transform group-hover:translate-x-1.5 transition duration-300">→</span>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. RECRUITMENT -->
-                <div x-show="activeTab === 'recruitment'" 
-                     x-transition:enter="transition ease-out duration-500 transform"
-                     x-transition:enter-start="opacity-0 translate-y-6 scale-95"
-                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                     class="supreme-glass rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-12 shadow-2xl space-y-6 sm:space-y-8 relative overflow-hidden border border-sky-500/30 spotlight-card">
-                    <div class="border-b border-slate-200/80 dark:border-slate-800 pb-5 sm:pb-6 relative z-10">
-                        <h3 class="font-outfit text-xl sm:text-4xl font-black flex items-center gap-3.5 text-slate-900 dark:text-white">
-                            <span class="p-2.5 sm:p-3 bg-sky-500/15 rounded-2xl text-sky-400 text-lg sm:text-xl shadow-inner border border-sky-500/40 shrink-0">📋</span>
-                            <span class="leading-snug">Informasi Recruitment</span>
-                        </h3>
-                    </div>
-
-                    <div class="space-y-5 sm:space-y-6 text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium leading-relaxed relative z-10">
-                        <div class="p-5 sm:p-6 rounded-2xl sm:rounded-3xl bg-sky-500/5 border border-sky-500/20 flex flex-col sm:flex-row items-start gap-4 sm:gap-5 shadow-sm">
-                            <span class="text-3xl shrink-0">📢</span>
-                            <div class="space-y-2">
-                                <h4 class="font-outfit font-extrabold text-sm sm:text-lg text-slate-900 dark:text-white">Jadwal & Pengumuman</h4>
-                                <p class="text-xs sm:text-sm">
-                                    Recruitment diadakan secara berkala sesuai kebutuhan server. Pantau terus channel <code class="px-2 py-0.5 bg-slate-200 dark:bg-slate-800 rounded text-sky-400 font-mono text-[11px] sm:text-xs">#announcements</code> untuk pendaftaran staff atau faksi baru!
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="p-5 sm:p-6 rounded-2xl sm:rounded-3xl bg-indigo-500/5 border border-indigo-500/20 flex flex-col sm:flex-row items-start gap-4 sm:gap-5 shadow-sm">
-                            <span class="text-3xl shrink-0">🎯</span>
-                            <div class="space-y-2">
-                                <h4 class="font-outfit font-extrabold text-sm sm:text-lg text-slate-900 dark:text-white">Persyaratan Umum</h4>
-                                <p class="text-xs sm:text-sm">
-                                    Kandidat wajib memiliki komitmen tinggi, aktif, memahami seluruh rules, serta memiliki etika komunikasi yang baik di dalam komunitas MoestordRP Hub.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 4. SESSION -->
-                <div x-show="activeTab === 'session'" 
-                     x-transition:enter="transition ease-out duration-500 transform"
-                     x-transition:enter-start="opacity-0 translate-y-6 scale-95"
-                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                     class="supreme-glass rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-12 shadow-2xl space-y-6 sm:space-y-8 relative overflow-hidden border border-emerald-500/30 spotlight-card">
-                    <div class="border-b border-slate-200/80 dark:border-slate-800 pb-5 sm:pb-6 relative z-10">
-                        <h3 class="font-outfit text-xl sm:text-4xl font-black flex items-center gap-3.5 text-slate-900 dark:text-white">
-                            <span class="p-2.5 sm:p-3 bg-emerald-500/15 rounded-2xl text-emerald-400 text-lg sm:text-xl shadow-inner border border-emerald-500/40 shrink-0">⏱️</span>
-                            <span class="leading-snug">Status Sesi Roleplay (Session)</span>
-                        </h3>
-                    </div>
-
-                    <div class="space-y-5 sm:space-y-6 text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium leading-relaxed relative z-10">
-                        <div class="p-5 sm:p-6 rounded-2xl sm:rounded-3xl bg-emerald-500/5 border border-emerald-500/20 flex flex-col sm:flex-row items-start gap-4 sm:gap-5 shadow-sm">
-                            <span class="text-3xl shrink-0">🎮</span>
-                            <div class="space-y-2">
-                                <h4 class="font-outfit font-extrabold text-sm sm:text-lg text-slate-900 dark:text-white">Jadwal Sesi Aktif</h4>
-                                <p class="text-xs sm:text-sm">
-                                    Sesi roleplay dibuka sesuai pengumuman resmi di server Discord. Bersiaplah lebih awal dan patuhi instruksi panitia atau staff yang bertugas.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="p-5 sm:p-6 rounded-2xl sm:rounded-3xl bg-sky-500/5 border border-sky-500/20 flex flex-col sm:flex-row items-start gap-4 sm:gap-5 shadow-sm">
-                            <span class="text-3xl shrink-0">🔗</span>
-                            <div class="space-y-2">
-                                <h4 class="font-outfit font-extrabold text-sm sm:text-lg text-slate-900 dark:text-white">Akses Private Server</h4>
-                                <p class="text-xs sm:text-sm">
-                                    Link private server Roblox hanya dibagikan di channel khusus Discord beberapa menit sebelum sesi dimulai. Nyalakan notifikasi Anda!
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-        </main>
-
-        <!-- FOOTER -->
-        <footer class="mt-16 sm:mt-20 border-t border-sky-500/20 py-8 sm:py-10 text-center text-xs font-mono text-slate-500 supreme-glass px-4">
-            <p>&copy; MoestordRP Hub &bull; An CDID Roleplay Group. All Rights Reserved.</p>
-        </footer>
-
-    </div>
-
+        themeBtn.addEventListener('click', () => {
+            playSound('theme');
+            htmlElement.classList.toggle('dark');
+            sunIcon.classList.toggle('hidden');
+            moonIcon.classList.toggle('hidden');
+        });
+    </script>
 </body>
 </html>
