@@ -25,8 +25,12 @@
                         'shine-sweep': 'shineSweep 3s infinite',
                         'text-gradient': 'textGradient 5s linear infinite',
                         'spin-slow': 'spin 12s linear infinite',
-                        'float': 'float 6s ease-in-out infinite',
                         'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+                        'dash-rotate': 'dashRotate 5s linear infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'glitch-scan': 'glitchScan 2s linear infinite',
+                        'shockwave': 'shockwave 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'matrix-fall': 'matrixFall 2s linear infinite',
                     },
                     keyframes: {
                         blob: {
@@ -43,13 +47,30 @@
                             '50%': { backgroundPosition: '100% 50%' },
                             '100%': { backgroundPosition: '0% 50%' }
                         },
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-12px)' },
-                        },
                         pulseGlow: {
                             '0%, 100%': { opacity: 0.5, transform: 'scale(1)' },
                             '50%': { opacity: 1, transform: 'scale(1.05)' },
+                        },
+                        dashRotate: {
+                            '0%': { transform: 'rotate(0deg)' },
+                            '100%': { transform: 'rotate(360deg)' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-15px)' }
+                        },
+                        glitchScan: {
+                            '0%': { backgroundPosition: '0 -100vh' },
+                            '100%': { backgroundPosition: '0 100vh' }
+                        },
+                        shockwave: {
+                            '0%': { transform: 'scale(0.8)', opacity: 1, borderWidth: '15px' },
+                            '100%': { transform: 'scale(4.5)', opacity: 0, borderWidth: '1px' }
+                        },
+                        matrixFall: {
+                            '0%': { transform: 'translateY(-100%)', opacity: 0 },
+                            '50%': { opacity: 1 },
+                            '100%': { transform: 'translateY(100%)', opacity: 0 }
                         }
                     }
                 }
@@ -62,237 +83,250 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
         [x-cloak] { display: none !important; }
 
         body { 
             overflow-x: hidden; 
-            background-color: #030712; 
+            background-color: #f1f5f9;
             -webkit-tap-highlight-color: transparent;
             scroll-behavior: smooth;
         }
+        html.dark body { background-color: #030712; }
 
-        /* CUSTOM MAGNETIC CURSOR UNTUK PC/LAPTOP */
+        /* CUSTOM MAGNETIC CURSOR */
         @media (pointer: fine) {
             body { cursor: none; }
-            a, button, input { cursor: none; }
-            .cursor-dot {
-                width: 6px; height: 6px; background-color: #ffffff;
-                border-radius: 50%; position: fixed; top: 0; left: 0;
-                transform: translate(-50%, -50%); z-index: 99999;
-                pointer-events: none; box-shadow: 0 0 10px #ffffff;
-            }
-            .cursor-outline {
-                width: 36px; height: 36px;
-                border: 1.5px solid rgba(255,255,255, 0.4);
-                border-radius: 50%; position: fixed; top: 0; left: 0;
-                transform: translate(-50%, -50%); z-index: 99998;
-                pointer-events: none; transition: width 0.25s, height 0.25s, background-color 0.25s, border-color 0.25s;
-                backdrop-filter: invert(10%);
-            }
-            .cursor-outline.hovering {
-                width: 60px; height: 60px;
-                background-color: rgba(255,255,255, 0.1);
-                border-color: rgba(255,255,255, 0.8);
-                backdrop-filter: blur(4px);
-            }
-        }
-        @media (pointer: coarse) {
-            .cursor-dot, .cursor-outline { display: none !important; }
-        }
+            a, button, input, label { cursor: none; }
+            
+            .cursor-dot { width: 6px; height: 6px; border-radius: 50%; position: fixed; top: 0; left: 0; transform: translate(-50%, -50%); z-index: 99999; pointer-events: none; transition: background-color 0.3s; }
+            html.dark .cursor-dot { background-color: #ffffff; box-shadow: 0 0 10px #ffffff; }
+            html:not(.dark) .cursor-dot { background-color: #0f172a; box-shadow: 0 0 10px #0f172a; }
 
-        /* Scrollbar Elegan */
+            .cursor-outline { width: 36px; height: 36px; border-radius: 50%; position: fixed; top: 0; left: 0; transform: translate(-50%, -50%); z-index: 99998; pointer-events: none; transition: width 0.25s, height 0.25s, background-color 0.25s, border-color 0.25s; border: 1.5px solid rgba(255,255,255, 0.4); }
+            html.dark .cursor-outline { backdrop-filter: invert(10%); border-color: rgba(255,255,255, 0.4); }
+            html:not(.dark) .cursor-outline { border-color: rgba(15,23,42,0.4); backdrop-filter: none; }
+            
+            html.dark .cursor-outline.hovering { width: 60px; height: 60px; background-color: rgba(255,255,255, 0.1); border-color: rgba(255,255,255, 0.8); backdrop-filter: blur(4px); }
+            html:not(.dark) .cursor-outline.hovering { width: 60px; height: 60px; background-color: rgba(15,23,42, 0.05); border-color: rgba(15,23,42, 0.5); }
+        }
+        @media (pointer: coarse) { .cursor-dot, .cursor-outline { display: none !important; } }
+
+        body.native-cursor, body.native-cursor * { cursor: auto !important; }
+        body.native-cursor .cursor-dot, body.native-cursor .cursor-outline { display: none !important; }
+        body.reduce-motion .ambient-mesh, body.reduce-motion .noise-bg, body.reduce-motion .grid-bg { display: none !important; }
+        body.reduce-motion .animate-blob, body.reduce-motion .animate-pulse-glow, body.reduce-motion .animate-text-gradient, body.reduce-motion .animate-shine-sweep, body.reduce-motion .animate-float { animation: none !important; }
+
         ::-webkit-scrollbar { width: 6px; }
         @media (min-width: 768px) { ::-webkit-scrollbar { width: 8px; } }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 10px; border: 2px solid #030712; }
+        html:not(.dark) ::-webkit-scrollbar-thumb { border: 2px solid #f8fafc; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.8); }
 
-        html.transition-theme * { transition: background-color 0.8s cubic-bezier(0.16,1,0.3,1), border-color 0.8s, color 0.8s !important; }
+        html.transition-theme * { transition: background-color 0.8s cubic-bezier(0.16,1,0.3,1), border-color 0.8s, color 0.8s, box-shadow 0.8s !important; }
 
-        /* Kaca Premium */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.6);
-        }
-        .dark .glass-panel {
-            background: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 30px 60px -15px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
-        }
+        /* ULTRA GLASSMORPHISM */
+        .panel { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(40px) saturate(150%); -webkit-backdrop-filter: blur(40px) saturate(150%); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.6); }
+        html.dark .panel { background: rgba(15, 23, 42, 0.35); backdrop-filter: blur(40px) saturate(150%); -webkit-backdrop-filter: blur(40px) saturate(150%); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 30px 60px -15px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.1); }
 
-        .noise-bg {
-            position: absolute; inset: 0; opacity: 0.02; pointer-events: none; z-index: -1;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-        }
-        .dark .noise-bg { opacity: 0.04; }
+        .noise-bg { position: fixed; inset: 0; opacity: 0.02; pointer-events: none; z-index: -1; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"); }
+        html.dark .noise-bg { opacity: 0.04; }
+
+        /* 3D CYBER GRID FOR INTRO (HYPERSPEED) */
+        .grid-bg { position: absolute; width: 300vw; height: 300vh; top: -100vh; left: -100vw; background-image: linear-gradient(rgba(99, 102, 241, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, 0.15) 1px, transparent 1px); background-size: 60px 60px; transform: perspective(600px) rotateX(60deg) translateY(0); animation: gridMove 10s linear infinite; mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 10%, transparent 100%); -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 10%, transparent 100%); pointer-events: none; }
+        html:not(.dark) .grid-bg { background-image: linear-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, 0.08) 1px, transparent 1px); }
+        @keyframes gridMove { 0% { transform: perspective(600px) rotateX(60deg) translateY(0); } 100% { transform: perspective(600px) rotateX(60deg) translateY(120px); } }
 
         .cyber-card { transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s, border-color 0.5s; will-change: transform; }
-        .cyber-card:hover { transform: translateY(-6px) scale(1.015); border-color: rgba(139, 92, 246, 0.4); box-shadow: 0 30px 60px -15px rgba(139, 92, 246, 0.25); }
+        .cyber-card:hover { transform: translateY(-8px) scale(1.015); border-color: rgba(139, 92, 246, 0.5); box-shadow: 0 40px 80px -20px rgba(139, 92, 246, 0.3); }
 
-        .animated-text-bg {
-            background-size: 200% auto;
-            color: transparent;
-            -webkit-background-clip: text;
-            background-clip: text;
-        }
+        .animated-text-bg { background-size: 200% auto; color: transparent; -webkit-background-clip: text; background-clip: text; }
+        .toggle-switch { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .toggle-knob { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .loading-bar-fill { transition: width 0.1s linear; }
 
-        /* Hover Button Glow */
-        .glow-border-light { box-shadow: 0 0 0 2px transparent, 0 15px 35px -10px rgba(56,189,248,0.4); }
-        .glow-border-light:hover { box-shadow: 0 0 0 2px rgba(56,189,248,0.8), 0 20px 40px -5px rgba(56,189,248,0.6); }
-        .glow-border-dark { box-shadow: 0 0 0 2px transparent, 0 15px 35px -10px rgba(139,92,246,0.3); }
-        .glow-border-dark:hover { box-shadow: 0 0 0 2px rgba(139,92,246,0.8), 0 20px 40px -5px rgba(139,92,246,0.6); }
+        .terminal-line { overflow: hidden; white-space: nowrap; animation: typing 0.5s steps(40, end); }
+        @keyframes typing { from { max-width: 0 } to { max-width: 100% } }
+        
+        /* TRANSISI CASCADING UI UTAMA */
+        .ui-cascade { transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
     </style>
 </head>
 <body x-data="appData()" x-init="initApp()" @scroll.window="scrolled = (window.pageYOffset > 100)"
-      class="antialiased selection:bg-brand-500 selection:text-white bg-slate-50 dark:bg-brand-900 text-slate-900 dark:text-white transition-colors duration-700 min-h-screen pb-32 sm:pb-40">
+      class="antialiased selection:bg-brand-500 selection:text-white text-slate-900 dark:text-white transition-colors duration-700 min-h-screen pb-32 sm:pb-40"
+      :class="{ 'native-cursor': !customCursor, 'reduce-motion': !animationsEnabled }">
 
     <!-- CUSTOM MAGNETIC CURSOR -->
     <div class="cursor-dot"></div>
     <div class="cursor-outline"></div>
 
+    <!-- FLASH OVERLAY (UNTUK TRANSISI WARP) -->
+    <div class="fixed inset-0 z-[9999] pointer-events-none transition-opacity duration-700 ease-in-out"
+         :class="flashState === 1 ? 'opacity-100' : 'opacity-0'"
+         :style="flashColor === 'dark' ? 'background-color: #030712;' : 'background-color: #ffffff;'">
+    </div>
+
     <!-- TOAST NOTIFICATION -->
     <div class="fixed top-20 sm:top-24 right-4 sm:right-6 max-w-[90vw] z-[300] transition-all duration-500 transform"
          :class="toastMessage ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-10 opacity-0 scale-95 pointer-events-none'">
-        <div class="glass-panel px-5 sm:px-6 py-3 sm:py-4 rounded-2xl shadow-2xl border-brand-500/50 flex items-center gap-3">
+        <div class="panel px-5 sm:px-6 py-3 sm:py-4 rounded-2xl shadow-2xl flex items-center gap-3 border-brand-500/50 border">
             <span class="text-xl sm:text-2xl animate-pulse">✨</span>
             <span class="font-display font-bold text-xs sm:text-sm tracking-wide" x-text="toastMessage"></span>
         </div>
     </div>
 
     <!-- AMBIENT MESH BACKGROUND -->
-    <div class="fixed inset-0 z-[-2] overflow-hidden pointer-events-none">
-        <div class="noise-bg"></div>
-        <div class="absolute top-[-20%] left-[-10%] w-[90vw] h-[90vw] max-w-[800px] max-h-[800px] rounded-full bg-gradient-to-br from-brand-500/30 to-fuchsia-500/20 blur-[120px] sm:blur-[160px] animate-blob mix-blend-multiply dark:mix-blend-screen opacity-70"></div>
-        <div class="absolute bottom-[-20%] right-[-10%] w-[85vw] h-[85vw] max-w-[750px] max-h-[750px] rounded-full bg-gradient-to-tl from-indigo-600/30 to-cyan-400/20 blur-[120px] sm:blur-[160px] animate-blob mix-blend-multiply dark:mix-blend-screen opacity-60" style="animation-delay: 3s; animation-direction: reverse;"></div>
-        <div class="absolute top-[40%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[50vw] h-[50vw] max-w-[500px] max-h-[500px] rounded-full bg-fuchsia-600/10 blur-[100px] animate-pulse-glow pointer-events-none"></div>
+    <div class="fixed inset-0 z-[-2] overflow-hidden pointer-events-none ambient-mesh">
+        <div class="absolute top-[-20%] left-[-10%] w-[100vw] h-[100vw] max-w-[900px] max-h-[900px] rounded-full bg-gradient-to-br from-brand-500/30 to-fuchsia-500/20 blur-[120px] sm:blur-[160px] animate-blob mix-blend-multiply dark:mix-blend-screen opacity-70"></div>
+        <div class="absolute bottom-[-20%] right-[-10%] w-[90vw] h-[90vw] max-w-[800px] max-h-[800px] rounded-full bg-gradient-to-tl from-indigo-600/30 to-cyan-400/20 blur-[120px] sm:blur-[160px] animate-blob mix-blend-multiply dark:mix-blend-screen opacity-60" style="animation-delay: 3s; animation-direction: reverse;"></div>
+        <div class="absolute top-[30%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] rounded-full bg-fuchsia-600/10 blur-[100px] animate-pulse-glow pointer-events-none"></div>
     </div>
+    <div class="noise-bg"></div>
 
-    <!-- GATEWAY SYSTEM (INITIALIZATION SCREEN) -->
-    <div x-show="showGateway" x-cloak
-         x-transition:leave="transition-all ease-[cubic-bezier(0.16,1,0.3,1)] duration-1000 delay-300"
-         x-transition:leave-start="opacity-100 filter blur-0"
-         x-transition:leave-end="opacity-0 filter blur-2xl scale-110"
-         class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-50/95 dark:bg-[#030712]/95 backdrop-blur-3xl">
+    <!-- ==========================================
+         GATEWAY SYSTEM (HACKER TERMINAL & WARP)
+         ========================================== -->
+    <div x-show="showGateway" 
+         class="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-8 overflow-hidden pointer-events-none"
+         :class="gatewayStep === 3 ? 'pointer-events-none' : 'pointer-events-auto'">
         
-        <div class="noise-bg"></div>
+        <div class="absolute inset-0 bg-slate-50/95 dark:bg-[#030712]/95 backdrop-blur-[50px] transition-all duration-[1200ms] ease-in-out"
+             :class="gatewayStep === 3 ? 'opacity-0 scale-150 blur-3xl' : 'opacity-100'"></div>
+        
+        <div class="grid-bg transition-all duration-[1200ms]" :class="gatewayStep === 3 ? 'opacity-0 scale-150 rotate-[20deg]' : 'opacity-100'"></div>
 
-        <div class="grid place-items-center w-full max-w-4xl h-[100dvh] max-h-[900px] relative">
+        <!-- TAHAP 0: HACKER TERMINAL BOOTING -->
+        <div x-show="gatewayStep === 0" 
+             x-transition:leave="transition-all duration-500 ease-in"
+             x-transition:leave-start="opacity-100 scale-100 blur-0"
+             x-transition:leave-end="opacity-0 scale-110 blur-xl"
+             class="absolute flex flex-col items-center justify-center w-full max-w-lg z-30 px-4">
+             
+             <!-- Cyber Scanner Effect (Garis vertikal turun) -->
+             <div class="absolute inset-0 bg-brand-500/20 h-1 w-full animate-matrix-fall blur-sm rounded-full"></div>
+
+             <div class="w-full bg-slate-900/80 dark:bg-black/80 backdrop-blur-md border border-brand-500/40 rounded-2xl p-6 shadow-[0_0_50px_rgba(56,189,248,0.2)] relative overflow-hidden">
+                 <div class="flex gap-2.5 mb-6 border-b border-white/10 pb-4">
+                     <span class="w-3.5 h-3.5 rounded-full bg-rose-500 shadow-[0_0_10px_#f43f5e]"></span>
+                     <span class="w-3.5 h-3.5 rounded-full bg-amber-500 shadow-[0_0_10px_#f59e0b]"></span>
+                     <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]"></span>
+                 </div>
+                 
+                 <div class="font-mono text-xs sm:text-sm text-brand-400 h-32 flex flex-col justify-end gap-1.5 overflow-hidden">
+                     <template x-for="(log, i) in displayedLogs" :key="i">
+                         <div class="terminal-line" x-html="log"></div>
+                     </template>
+                     <div class="w-2 h-4 bg-brand-400 animate-pulse mt-1"></div>
+                 </div>
+
+                 <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mt-6 shadow-inner relative">
+                     <div class="absolute top-0 bottom-0 left-0 bg-brand-500 shadow-[0_0_15px_#38bdf8] loading-bar-fill" :style="`width: ${bootProgress}%`"></div>
+                 </div>
+                 <div class="flex justify-between font-mono text-[10px] text-slate-500 mt-2 tracking-widest uppercase">
+                     <span>Bypassing System... <span class="text-brand-600 ml-2 animate-pulse" x-text="randomHex"></span></span>
+                     <span class="text-brand-400 font-bold" x-text="bootProgress + '%'"></span>
+                 </div>
+             </div>
+        </div>
+
+        <!-- TAHAP 1 & 2: LOGO GLIDING -->
+        <div class="relative w-full max-w-5xl flex flex-col items-center justify-center z-20 transition-all duration-[1500ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+             :style="getGatewayWrapperStyle()"
+             x-show="gatewayStep >= 1">
             
-            <!-- LOGO CONTAINER -->
-            <div class="col-start-1 row-start-1 z-30 transition-all duration-[1200ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] relative flex flex-col items-center"
-                 :class="gatewayStep >= 2 ? '-translate-y-[28dvh] sm:-translate-y-[180px] scale-75 sm:scale-[0.85]' : 'translate-y-0 scale-100'">
-                
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160px] h-[160px] sm:w-[220px] sm:h-[220px] rounded-full border-t-[3px] border-l-[3px] border-brand-500/60 animate-spin-slow opacity-80"
-                     x-show="gatewayStep >= 1" x-transition:enter="transition-all duration-700 ease-out" x-transition:enter-start="opacity-0 scale-50" x-transition:enter-end="opacity-80 scale-100"></div>
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[190px] h-[190px] sm:w-[260px] sm:h-[260px] rounded-full border-b-[2px] border-r-[2px] border-fuchsia-400/40 animate-spin-slow opacity-60" style="animation-direction: reverse; animation-duration: 12s;"
-                     x-show="gatewayStep >= 1" x-transition:enter="transition-all duration-700 ease-out delay-150" x-transition:enter-start="opacity-0 scale-50" x-transition:enter-end="opacity-60 scale-100"></div>
-                     
-                <div x-show="gatewayStep >= 1" 
-                     x-transition:enter="transition-all duration-[800ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]" 
-                     x-transition:enter-start="opacity-0 scale-0 rotate-90" 
-                     x-transition:enter-end="opacity-100 scale-100 rotate-0" 
-                     class="relative z-10 flex items-center justify-center w-32 h-32 sm:w-44 sm:h-44 rounded-[2rem] sm:rounded-[3rem] bg-gradient-to-br from-white/20 to-white/5 dark:from-slate-800/60 dark:to-slate-900/60 backdrop-blur-2xl shadow-[0_0_60px_rgba(99,102,241,0.5)] border border-white/30 dark:border-white/10 overflow-hidden animate-float">
-                    <div class="absolute inset-0 bg-white/20 dark:bg-white/10 -skew-x-12 translate-x-[-150%] animate-shine-sweep" style="animation-duration: 4s;"></div>
-                    <img src="https://cdn.discordapp.com/attachments/1541650179986296911/1563380638206398525/transparrent.png?ex=6add6b2e&is=6adc19ae&hm=9278a15399e74c8bf868e9e133f508d2c4bfd4c47954431df928ff20ea34b80a&" 
-                         alt="The Mastreo Logo" 
-                         class="relative z-10 w-24 h-24 sm:w-32 sm:h-32 object-contain drop-shadow-[0_0_25px_rgba(255,255,255,0.4)]">
+            <div class="absolute top-[80px] sm:top-[120px] left-1/2 -translate-x-1/2 w-32 h-32 sm:w-48 sm:h-48 rounded-full border-brand-500 pointer-events-none"
+                 :class="gatewayStep === 1 ? 'animate-shockwave' : 'opacity-0'"></div>
+
+            <div class="relative w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 rounded-[2.5rem] sm:rounded-[3.5rem] md:rounded-[4.5rem] bg-gradient-to-br from-brand-400 via-brand-500 to-fuchsia-600 p-1.5 sm:p-2.5 shadow-[0_0_100px_rgba(99,102,241,0.7)] transition-all duration-[1200ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] animate-float shrink-0"
+                 :class="gatewayStep >= 1 ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 -rotate-[30deg] pointer-events-none'">
+                <div class="w-full h-full bg-white dark:bg-[#030712] rounded-[2.2rem] sm:rounded-[3.1rem] md:rounded-[4.1rem] flex items-center justify-center p-6 sm:p-8 md:p-10 transition-colors duration-700 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-brand-500/20 to-transparent animate-glitch-scan pointer-events-none"></div>
+                    <img src="https://cdn.discordapp.com/attachments/1541650179986296911/1563380638206398525/transparrent.png?ex=6add6b2e&is=6adc19ae&hm=9278a15399e74c8bf868e9e133f508d2c4bfd4c47954431df928ff20ea34b80a&" alt="The Mastreo" class="w-full h-full object-contain relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]">
                 </div>
             </div>
 
-            <!-- TEKS INITIALIZATION -->
-            <div class="col-start-1 row-start-1 z-20 w-full px-4 text-center transition-all duration-[1200ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-                 :class="gatewayStep >= 2 ? 'opacity-100 -translate-y-[6dvh] sm:-translate-y-[10px]' : 'opacity-0 translate-y-[5vh] sm:translate-y-[40px] pointer-events-none'">
-                <h2 class="font-display font-black text-3xl sm:text-5xl text-slate-900 dark:text-white tracking-tighter uppercase animated-text-bg bg-gradient-to-r from-brand-400 via-fuchsia-500 to-brand-400 animate-text-gradient drop-shadow-[0_0_20px_rgba(217,70,239,0.3)]">Sistem Memuat</h2>
-                <div class="flex items-center justify-center gap-2 mt-2 sm:mt-4">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_15px_#10b981] animate-pulse"></span>
-                    <p class="font-mono text-slate-500 dark:text-slate-400 text-xs sm:text-sm font-bold uppercase tracking-[0.3em] sm:tracking-[0.4em]">Siapkan Lingkungan</p>
+            <div class="text-center mt-10 sm:mt-12 transition-all duration-[1200ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] w-full shrink-0"
+                 :class="gatewayStep >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16 pointer-events-none'">
+                <div class="inline-flex items-center gap-2 mb-3 sm:mb-5 px-5 py-2 rounded-full bg-brand-500/10 dark:bg-brand-500/20 border border-brand-500/30 text-brand-600 dark:text-brand-400 font-mono text-[10px] sm:text-xs font-bold tracking-[0.3em] uppercase shadow-[0_0_20px_rgba(99,102,241,0.2)]">
+                    <span class="w-2 h-2 rounded-full bg-brand-500 animate-ping"></span> KONEKSI MAINFRAME DIBUKA
                 </div>
+                <h2 class="font-display font-black text-5xl sm:text-6xl md:text-8xl text-slate-900 dark:text-white tracking-tight mb-2 sm:mb-4 leading-none">
+                    Pilih <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 via-fuchsia-500 to-brand-500 bg-[length:200%_auto] animate-text-gradient drop-shadow-[0_0_30px_rgba(217,70,239,0.4)]">Dimensi</span>
+                </h2>
+                <p class="text-slate-500 dark:text-slate-400 font-medium text-sm sm:text-lg md:text-xl max-w-2xl mx-auto px-4 mt-4">
+                    Tentukan preferensi visual Anda sebelum melakukan lompatan *hyper-warp* ke ekosistem The Mastreo.
+                </p>
             </div>
 
-            <!-- TEMA BUTTONS -->
-            <div class="col-start-1 row-start-1 z-10 w-full max-w-3xl px-4 sm:px-8 transition-all duration-[1000ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-                 :class="gatewayStep >= 3 ? 'opacity-100 translate-y-[18dvh] sm:translate-y-[180px]' : 'opacity-0 translate-y-[28dvh] sm:translate-y-[250px] pointer-events-none'">
-                
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
-                    <!-- Light Mode Button -->
-                    <button @click="selectTheme(false)" class="interactive-btn group relative w-full p-6 sm:p-10 rounded-[2rem] sm:rounded-[2.5rem] bg-white/70 border border-white/50 backdrop-blur-2xl glow-border-light hover:-translate-y-3 hover:scale-[1.02] active:scale-95 transition-all duration-500 flex flex-row sm:flex-col items-center justify-start sm:justify-center gap-5 sm:gap-6 overflow-hidden cursor-none text-left sm:text-center shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)]">
-                        <div class="absolute inset-0 bg-gradient-to-br from-brand-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        <div class="relative w-16 h-16 sm:w-24 sm:h-24 shrink-0 rounded-2xl sm:rounded-3xl bg-brand-50 border border-brand-200 flex items-center justify-center group-hover:rotate-12 transition-transform duration-500 shadow-[inset_0_2px_10px_rgba(255,255,255,0.8)]">
-                            <svg class="w-8 h-8 sm:w-12 sm:h-12 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <!-- TOMBOL TEMA -->
+            <div class="w-full mt-10 transition-all duration-[1200ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] shrink-0"
+                 :class="gatewayStep >= 2 ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-24 scale-90 pointer-events-none'">
+                <div class="flex flex-col md:flex-row items-stretch justify-center gap-6 sm:gap-10 w-full max-w-4xl mx-auto px-4">
+                    <button @click="selectThemeAndEnter('light')"
+                            class="group relative flex-1 p-6 sm:p-10 rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden text-center flex flex-col items-center justify-center gap-5 sm:gap-6 transition-all duration-700 hover:-translate-y-4 active:scale-95 cursor-none bg-white/70 dark:bg-slate-900/40 border-2 border-slate-200 dark:border-white/5 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.05)] hover:shadow-[0_40px_80px_rgba(99,102,241,0.3)] hover:border-brand-400 dark:hover:border-brand-500/50">
+                        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                        <div class="relative z-10 w-20 h-20 sm:w-28 sm:h-28 shrink-0 rounded-[1.5rem] sm:rounded-[2rem] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-inner transition-transform duration-700 group-hover:rotate-12 group-hover:scale-110">
+                            <svg class="w-10 h-10 sm:w-14 sm:h-14 text-brand-500 dark:text-slate-500 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                         </div>
                         <div class="relative z-10">
-                            <h3 class="font-display font-black text-2xl sm:text-3xl lg:text-4xl text-slate-900 tracking-tight">Light Mode</h3>
-                            <p class="font-mono text-[10px] sm:text-xs text-brand-600 font-bold tracking-[0.2em] mt-1.5 uppercase">Bersih & Terang</p>
+                            <h3 class="font-display font-black text-2xl sm:text-4xl tracking-tight text-slate-800 dark:text-slate-200 group-hover:text-brand-600 transition-colors">Light Mode</h3>
+                            <p class="font-mono text-[10px] sm:text-xs font-bold tracking-widest text-slate-400 mt-2 uppercase group-hover:text-brand-500 transition-colors">Masuk Dimensi Terang</p>
                         </div>
                     </button>
-
-                    <!-- Dark Mode Button -->
-                    <button @click="selectTheme(true)" class="interactive-btn group relative w-full p-6 sm:p-10 rounded-[2rem] sm:rounded-[2.5rem] bg-slate-900/60 border border-slate-700/50 backdrop-blur-2xl glow-border-dark hover:-translate-y-3 hover:scale-[1.02] active:scale-95 transition-all duration-500 flex flex-row sm:flex-col items-center justify-start sm:justify-center gap-5 sm:gap-6 overflow-hidden cursor-none text-left sm:text-center shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]">
-                        <div class="absolute inset-0 bg-gradient-to-br from-fuchsia-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        <div class="relative w-16 h-16 sm:w-24 sm:h-24 shrink-0 rounded-2xl sm:rounded-3xl bg-slate-800/80 border border-slate-600 flex items-center justify-center group-hover:-rotate-12 transition-transform duration-500 shadow-[inset_0_2px_15px_rgba(0,0,0,0.6)]">
-                            <svg class="w-8 h-8 sm:w-12 sm:h-12 text-fuchsia-400 drop-shadow-[0_0_10px_rgba(217,70,239,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    <button @click="selectThemeAndEnter('dark')"
+                            class="group relative flex-1 p-6 sm:p-10 rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden text-center flex flex-col items-center justify-center gap-5 sm:gap-6 transition-all duration-700 hover:-translate-y-4 active:scale-95 cursor-none bg-slate-900/10 dark:bg-slate-900/80 border-2 border-slate-300 dark:border-white/10 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:shadow-[0_40px_80px_rgba(217,70,239,0.4)] hover:border-fuchsia-500 dark:hover:border-fuchsia-500/50">
+                        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                        <div class="relative z-10 w-20 h-20 sm:w-28 sm:h-28 shrink-0 rounded-[1.5rem] sm:rounded-[2rem] bg-slate-200 dark:bg-[#0f172a] border border-slate-300 dark:border-slate-700 flex items-center justify-center shadow-inner transition-transform duration-700 group-hover:-rotate-12 group-hover:scale-110">
+                            <svg class="w-10 h-10 sm:w-14 sm:h-14 text-slate-500 dark:text-fuchsia-400 drop-shadow-[0_0_15px_rgba(217,70,239,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
                         </div>
                         <div class="relative z-10">
-                            <h3 class="font-display font-black text-2xl sm:text-3xl lg:text-4xl text-white tracking-tight">Dark Mode</h3>
-                            <p class="font-mono text-[10px] sm:text-xs text-fuchsia-400 font-bold tracking-[0.2em] mt-1.5 uppercase">Elegan & Nyaman</p>
+                            <h3 class="font-display font-black text-2xl sm:text-4xl tracking-tight text-slate-800 dark:text-white group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">Dark Mode</h3>
+                            <p class="font-mono text-[10px] sm:text-xs font-bold tracking-widest text-slate-500 mt-2 uppercase group-hover:text-fuchsia-500 dark:group-hover:text-fuchsia-400 transition-colors">Masuk Dimensi Gelap</p>
                         </div>
                     </button>
                 </div>
             </div>
-            
         </div>
     </div>
 
-    <!-- HEADER MENU -->
-    <header class="w-full fixed top-0 left-0 z-40 px-3 sm:px-8 py-4 sm:py-6 transition-all duration-1000 delay-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-            :class="showGateway ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'">
-        <div class="max-w-7xl mx-auto glass-panel rounded-full px-4 sm:px-5 py-2.5 sm:py-3 flex justify-between items-center shadow-[0_15px_30px_rgba(0,0,0,0.15)]">
-            <div class="flex items-center gap-3 sm:gap-4 group interactive-btn cursor-none" @click="playSfx('click')">
+    <!-- ==========================================
+         HEADER MENU & NAVBAR (CASCADING REVEAL)
+         ========================================== -->
+    <header class="w-full fixed top-0 left-0 z-40 px-3 sm:px-8 py-4 sm:py-6 ui-cascade delay-[300ms]"
+            :class="mainUiReady ? 'translate-y-0 opacity-100' : '-translate-y-[150%] opacity-0'">
+        <div class="max-w-7xl mx-auto panel rounded-full px-4 sm:px-5 py-2.5 sm:py-3 flex justify-between items-center shadow-[0_15px_30px_rgba(0,0,0,0.1)]">
+            <div class="flex items-center gap-3 sm:gap-4 group interactive-btn cursor-none" @click="playSfx('click'); switchTab('pendahuluan')">
                 <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-full bg-gradient-to-br from-brand-400 to-fuchsia-500 p-[2px] shadow-[0_5px_15px_rgba(99,102,241,0.5)]">
                     <div class="w-full h-full bg-white dark:bg-[#030712] rounded-full flex items-center justify-center p-1.5 overflow-hidden backdrop-blur-md">
                         <img src="https://cdn.discordapp.com/attachments/1541650179986296911/1563380638206398525/transparrent.png?ex=6add6b2e&is=6adc19ae&hm=9278a15399e74c8bf868e9e133f508d2c4bfd4c47954431df928ff20ea34b80a&" alt="The Mastreo" class="w-full h-full object-contain">
                     </div>
                 </div>
-                <div class="overflow-hidden">
-                    <h1 class="font-display font-black text-lg sm:text-2xl text-slate-900 dark:text-white tracking-tight truncate group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-brand-400 group-hover:to-fuchsia-500 transition-all duration-300">The Mastreo</h1>
+                <div class="overflow-hidden flex flex-col justify-center">
+                    <h1 class="font-display font-black text-lg sm:text-2xl text-slate-900 dark:text-white tracking-tight truncate group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-brand-500 group-hover:to-fuchsia-500 transition-all duration-300 leading-none">The Mastreo</h1>
+                    <span class="font-mono text-[8px] sm:text-[10px] text-brand-600 dark:text-brand-400 font-bold uppercase tracking-widest mt-0.5">Official Portal</span>
                 </div>
             </div>
-            
-            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-                <button @click="toggleTheme()" class="interactive-btn w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/10 hover:bg-black/10 hover:scale-110 active:scale-95 transition-all cursor-none border border-transparent dark:border-white/10">
-                    <svg x-show="!isDark" class="w-5 h-5 sm:w-6 sm:h-6 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-                    <svg x-show="isDark" class="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                </button>
-                <button @click="sfxEnabled = !sfxEnabled; playSfx('click')" class="interactive-btn bg-black/5 dark:bg-white/10 px-3 py-2 sm:px-5 sm:py-3 rounded-full text-[10px] sm:text-xs font-mono font-bold flex items-center gap-2 sm:hover:scale-105 active:scale-95 transition-all cursor-none text-slate-800 dark:text-white border border-transparent dark:border-white/10">
-                    <span class="text-sm sm:text-base" x-text="sfxEnabled ? '🔊' : '🔇'"></span>
-                    <span class="hidden sm:block uppercase tracking-wider" x-text="sfxEnabled ? 'SFX ON' : 'SFX OFF'"></span>
+            <div class="flex items-center shrink-0">
+                <button @click="openSettings()" class="interactive-btn group bg-slate-100 dark:bg-white/10 px-4 py-2 sm:px-6 sm:py-3 rounded-full text-xs sm:text-sm font-display font-black flex items-center gap-2 sm:hover:scale-105 active:scale-95 transition-all cursor-none text-slate-800 dark:text-white border border-slate-200 dark:border-white/20 shadow-sm">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 group-hover:rotate-90 transition-transform duration-700 ease-in-out" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span class="hidden sm:block uppercase tracking-wider">Settings</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- NAVBAR BAWAH (MOBILE & DESKTOP) -->
-    <div class="fixed bottom-5 sm:bottom-10 left-1/2 -translate-x-1/2 z-50 w-[96%] sm:w-[90%] max-w-2xl transition-all duration-1000 delay-[700ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-         :class="showGateway ? 'translate-y-32 opacity-0 scale-50' : 'translate-y-0 opacity-100 scale-100'">
-        <div class="w-full glass-panel rounded-full shadow-[0_30px_60px_rgba(0,0,0,0.4)] p-1.5 sm:p-2 border-white/60 dark:border-white/20">
+    <!-- NAVBAR BAWAH (CASCADING REVEAL) -->
+    <div class="fixed bottom-5 sm:bottom-10 left-1/2 -translate-x-1/2 z-40 w-[96%] sm:w-[90%] max-w-2xl ui-cascade delay-[500ms]"
+         :class="mainUiReady ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-[150%] opacity-0 scale-75'">
+        <div class="w-full panel rounded-full p-1.5 sm:p-2 shadow-[0_20px_40px_rgba(0,0,0,0.3)]">
             <nav class="flex relative items-center justify-between w-full">
-                <!-- Indikator Geser -->
-                <div class="absolute h-10 sm:h-14 rounded-full bg-gradient-to-r from-brand-400 via-brand-500 to-fuchsia-500 shadow-[0_0_20px_rgba(99,102,241,0.6)] z-0 transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)"
-                     :style="getIndicatorStyle()"></div>
-
+                <div class="absolute h-10 sm:h-14 rounded-full bg-gradient-to-r from-brand-400 via-brand-500 to-fuchsia-500 shadow-[0_0_20px_rgba(99,102,241,0.6)] z-0 transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)" :style="getIndicatorStyle()"></div>
                 <template x-for="(tab, index) in ['pendahuluan', 'rules', 'recruitment', 'session']">
-                    <button @click="switchTab(tab)" class="interactive-btn relative z-10 flex-1 h-10 sm:h-14 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2.5 rounded-full font-display text-[9px] sm:text-sm font-black transition-all duration-300 sm:hover:scale-110 active:scale-95 group cursor-none"
-                            :class="activeTab === tab ? 'text-white drop-shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
-                        <span class="text-sm sm:text-xl sm:group-hover:-translate-y-1 transition-transform" 
-                              x-text="tab === 'pendahuluan' ? '💡' : tab === 'rules' ? '⚖️' : tab === 'recruitment' ? '📋' : '🚀'"></span> 
+                    <button @click="switchTab(tab)" class="interactive-btn relative z-10 flex-1 h-10 sm:h-14 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2.5 rounded-full font-display text-[9px] sm:text-sm font-black transition-all duration-300 sm:hover:scale-110 active:scale-95 group cursor-none" :class="activeTab === tab ? 'text-white drop-shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'">
+                        <span class="text-sm sm:text-xl sm:group-hover:-translate-y-1 transition-transform" x-text="tab === 'pendahuluan' ? '💡' : tab === 'rules' ? '⚖️' : tab === 'recruitment' ? '📋' : '🚀'"></span> 
                         <span class="tracking-wide uppercase truncate" x-text="tab === 'pendahuluan' ? 'Intro' : tab"></span>
                     </button>
                 </template>
@@ -300,363 +334,347 @@
         </div>
     </div>
 
-    <!-- TOMBOL KEMBALI KE ATAS -->
     <button @click="window.scrollTo({top: 0, behavior: 'smooth'}); playSfx('click')" 
-            class="interactive-btn fixed bottom-24 sm:bottom-32 right-4 sm:right-10 w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-t from-brand-600 to-fuchsia-500 text-white flex items-center justify-center shadow-[0_15px_30px_rgba(217,70,239,0.5)] z-40 transition-all duration-500 hover:scale-110 active:scale-95 cursor-none border-2 border-white/20"
+            class="interactive-btn fixed bottom-24 sm:bottom-32 right-4 sm:right-10 w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-t from-brand-600 to-fuchsia-500 text-white flex items-center justify-center shadow-[0_15px_30px_rgba(217,70,239,0.5)] z-30 transition-all duration-500 hover:scale-110 active:scale-95 cursor-none border-2 border-white/20"
             :class="scrolled ? 'translate-y-0 opacity-100 visible' : 'translate-y-20 opacity-0 invisible'">
         <svg class="w-6 h-6 sm:w-8 sm:h-8 drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7"></path></svg>
     </button>
 
-    <!-- KONTEN UTAMA -->
-    <main class="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 pt-32 sm:pt-44 md:pt-52">
+    <!-- ==========================================
+         KONTEN UTAMA (CASCADING REVEAL)
+         ========================================== -->
+    <div class="ui-cascade delay-[700ms]"
+         :class="mainUiReady ? 'opacity-100 translate-y-0 filter blur-0 scale-100' : 'opacity-0 translate-y-24 filter blur-2xl scale-95 pointer-events-none'">
+        <main class="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 pt-32 sm:pt-44 md:pt-52">
 
-        <!-- 1. PENDAHULUAN -->
-        <div x-show="activeTab === 'pendahuluan'" style="display: none;"
-             x-transition:enter="transition ease-out duration-700 delay-200"
-             x-transition:enter-start="opacity-0 translate-y-12"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             class="space-y-16 sm:space-y-24">
-            
-            <div class="relative text-center space-y-4 sm:space-y-6 mb-16 sm:mb-28 mt-4 sm:mt-10">
-                <div class="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-brand-500/10 dark:bg-white/5 border border-brand-500/30 dark:border-white/10 text-brand-600 dark:text-brand-300 text-[10px] sm:text-xs font-mono font-bold tracking-[0.2em] uppercase shadow-[0_0_30px_rgba(99,102,241,0.2)] backdrop-blur-md mb-4 sm:mb-8">
-                    <span class="animate-spin-slow text-sm sm:text-lg">✨</span> OFFICIAL PORTAL
+            <!-- 1. PENDAHULUAN -->
+            <div x-show="activeTab === 'pendahuluan'" style="display: none;"
+                 x-transition:enter="transition ease-out duration-700 delay-200"
+                 x-transition:enter-start="opacity-0 translate-y-12"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 class="space-y-16 sm:space-y-24">
+                
+                <div class="relative text-center space-y-4 sm:space-y-6 mb-16 sm:mb-28 mt-4 sm:mt-10">
+                    <div class="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-brand-500/10 dark:bg-brand-500/20 border border-brand-500/30 text-brand-600 dark:text-brand-300 text-[10px] sm:text-xs font-mono font-bold tracking-[0.2em] uppercase shadow-[0_0_30px_rgba(99,102,241,0.2)] backdrop-blur-md mb-4 sm:mb-8">
+                        <span class="animate-spin-slow text-sm sm:text-lg">✨</span> OFFICIAL PORTAL
+                    </div>
+                    
+                    <h2 class="font-display text-6xl sm:text-8xl md:text-[8rem] lg:text-[10rem] font-black leading-[0.95] tracking-tighter">
+                        <span class="animated-text-bg bg-gradient-to-r from-brand-500 via-fuchsia-500 to-brand-500 animate-text-gradient drop-shadow-[0_0_30px_rgba(217,70,239,0.4)]">The Mastreo</span>
+                    </h2>
+                    
+                    <p class="text-slate-600 dark:text-slate-400 max-w-4xl mx-auto text-base sm:text-xl md:text-2xl font-medium leading-relaxed px-4 mt-6 sm:mt-10">
+                        Selamat datang di ekosistem roleplay di mana setiap karakter memiliki ceritanya sendiri, didukung oleh standar komunitas yang sehat dan terstruktur di An CDID Roleplay Group.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 max-w-7xl mx-auto">
+                    <!-- Cards Pendahuluan Tetap Sama Sempurna -->
+                    <div class="panel cyber-card interactive-btn col-span-1 md:col-span-2 p-8 sm:p-12 lg:p-16 rounded-[2rem] sm:rounded-[3rem] flex flex-col md:flex-row items-center gap-8 sm:gap-12 group relative overflow-hidden cursor-none">
+                        <div class="absolute inset-0 bg-gradient-to-br from-brand-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+                        <div class="relative z-10 w-28 h-28 sm:w-40 sm:h-40 shrink-0 rounded-[2rem] sm:rounded-[2.5rem] bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-[0_0_40px_rgba(99,102,241,0.6)] border-4 border-white/20 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-700 overflow-hidden p-4">
+                            <img src="https://cdn.discordapp.com/attachments/1541650179986296911/1563380638206398525/transparrent.png?ex=6add6b2e&is=6adc19ae&hm=9278a15399e74c8bf868e9e133f508d2c4bfd4c47954431df928ff20ea34b80a&" alt="Logo" class="w-full h-full object-contain drop-shadow-2xl">
+                        </div>
+                        <div class="relative z-10 text-center md:text-left">
+                            <h3 class="font-display font-black text-3xl sm:text-5xl lg:text-6xl tracking-tight text-slate-900 dark:text-white mb-3 sm:mb-5 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">Interaksi Penuh</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-base sm:text-lg lg:text-xl leading-relaxed font-medium">Di <strong class="text-brand-600 dark:text-brand-400">The Mastreo</strong>, setiap aksi yang kamu ambil mengukir cerita kota. Interaksi berjalan natural, dibangun dari komitmen penuh para warganya.</p>
+                        </div>
+                    </div>
+
+                    <div class="panel cyber-card interactive-btn col-span-1 p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] flex flex-col items-start gap-5 sm:gap-6 group relative overflow-hidden cursor-none">
+                        <div class="relative z-10 w-16 h-16 sm:w-20 sm:h-20 rounded-[1.5rem] sm:rounded-[2rem] bg-slate-100 dark:bg-white/5 flex items-center justify-center text-4xl sm:text-5xl border border-slate-200 dark:border-white/10 group-hover:scale-110 transition-transform duration-500 shadow-inner">🎭</div>
+                        <div class="relative z-10 mt-auto">
+                            <h3 class="font-display font-black text-2xl sm:text-3xl text-slate-900 dark:text-white mb-2 sm:mb-3 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">Jiwa Karakter (IC)</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base font-medium leading-relaxed">Fokus pada pendalaman peran untuk menciptakan pengalaman interaksi yang nyata dan menyenangkan antar pemain.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="panel cyber-card interactive-btn col-span-1 p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] flex flex-col items-start gap-5 sm:gap-6 group relative overflow-hidden cursor-none">
+                        <div class="relative z-10 w-16 h-16 sm:w-20 sm:h-20 rounded-[1.5rem] sm:rounded-[2rem] bg-slate-100 dark:bg-white/5 flex items-center justify-center text-4xl sm:text-5xl border border-slate-200 dark:border-white/10 group-hover:scale-110 transition-transform duration-500 shadow-inner">⚖️</div>
+                        <div class="relative z-10 mt-auto">
+                            <h3 class="font-display font-black text-2xl sm:text-3xl text-slate-900 dark:text-white mb-2 sm:mb-3 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">Hukum & Keadilan</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base font-medium leading-relaxed">Kebebasan berekspresi sejalan dengan aturan. Kami menjaga ketertiban melalui penerapan sanksi yang adil.</p>
+                        </div>
+                    </div>
+
+                    <div class="panel cyber-card interactive-btn col-span-1 md:col-span-2 p-6 sm:p-10 lg:p-12 rounded-[2rem] sm:rounded-[3rem] flex flex-col sm:flex-row items-center gap-6 sm:gap-10 group relative overflow-hidden cursor-none">
+                        <div class="absolute inset-0 bg-gradient-to-tl from-fuchsia-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+                        <div class="relative z-10 w-20 h-20 sm:w-28 sm:h-28 shrink-0 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-4xl sm:text-6xl border border-slate-200 dark:border-white/10 group-hover:scale-110 transition-transform duration-500 shadow-inner">🤝</div>
+                        <div class="relative z-10 text-center sm:text-left">
+                            <h3 class="font-display font-black text-2xl sm:text-4xl text-slate-900 dark:text-white mb-2 sm:mb-3 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">Saling Menghargai</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-lg font-medium leading-relaxed">Dasar komunitas kami adalah rasa hormat. Kita menjunjung tinggi sportivitas antar sesama pemain dan pengurus.</p>
+                        </div>
+                    </div>
                 </div>
                 
-                <h2 class="font-display text-6xl sm:text-8xl md:text-[8rem] lg:text-[10rem] font-black leading-[0.95] tracking-tighter">
-                    <span class="animated-text-bg bg-gradient-to-r from-brand-400 via-fuchsia-500 to-brand-400 animate-text-gradient drop-shadow-[0_0_30px_rgba(217,70,239,0.4)]">The Mastreo</span>
-                </h2>
-                
-                <p class="text-slate-600 dark:text-slate-400 max-w-4xl mx-auto text-base sm:text-xl md:text-2xl font-medium leading-relaxed px-4 mt-6 sm:mt-10">
-                    Selamat datang di ekosistem roleplay di mana setiap karakter memiliki ceritanya sendiri, didukung oleh standar komunitas yang sehat dan terstruktur di An CDID Roleplay Group.
-                </p>
-            </div>
-
-            <!-- Bento Grid 3 Kolom -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 max-w-7xl mx-auto">
-                
-                <div class="glass-panel cyber-card interactive-btn col-span-1 md:col-span-2 p-8 sm:p-12 lg:p-16 rounded-[2rem] sm:rounded-[3rem] flex flex-col md:flex-row items-center gap-8 sm:gap-12 group relative overflow-hidden cursor-none border-brand-500/30">
-                    <div class="absolute inset-0 bg-gradient-to-br from-brand-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-                    
-                    <div class="relative z-10 w-28 h-28 sm:w-40 sm:h-40 shrink-0 rounded-[2rem] sm:rounded-[2.5rem] bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-[0_0_40px_rgba(99,102,241,0.6)] border-4 border-white/20 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-700 overflow-hidden p-4">
-                        <img src="https://cdn.discordapp.com/attachments/1541650179986296911/1563380638206398525/transparrent.png?ex=6add6b2e&is=6adc19ae&hm=9278a15399e74c8bf868e9e133f508d2c4bfd4c47954431df928ff20ea34b80a&" alt="Logo" class="w-full h-full object-contain drop-shadow-2xl">
-                    </div>
-                    <div class="relative z-10 text-center md:text-left">
-                        <h3 class="font-display font-black text-3xl sm:text-5xl lg:text-6xl tracking-tight text-slate-900 dark:text-white mb-3 sm:mb-5 group-hover:text-brand-400 transition-colors">Interaksi Penuh</h3>
-                        <p class="text-slate-600 dark:text-slate-400 text-base sm:text-lg lg:text-xl leading-relaxed font-medium">Di <strong class="text-brand-500 dark:text-brand-400">The Mastreo</strong>, setiap aksi yang kamu ambil mengukir cerita kota. Interaksi berjalan natural, dibangun dari komitmen penuh para warganya.</p>
-                    </div>
-                </div>
-
-                <div class="glass-panel cyber-card interactive-btn col-span-1 p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] flex flex-col items-start gap-5 sm:gap-6 group relative overflow-hidden cursor-none">
-                    <div class="relative z-10 w-16 h-16 sm:w-20 sm:h-20 rounded-[1.5rem] sm:rounded-[2rem] bg-black/5 dark:bg-white/5 flex items-center justify-center text-4xl sm:text-5xl border border-black/10 dark:border-white/10 group-hover:scale-110 transition-transform duration-500 shadow-inner">🎭</div>
-                    <div class="relative z-10 mt-auto">
-                        <h3 class="font-display font-black text-2xl sm:text-3xl text-slate-900 dark:text-white mb-2 sm:mb-3 group-hover:text-fuchsia-400 transition-colors">Jiwa Karakter (IC)</h3>
-                        <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base font-medium leading-relaxed">Fokus pada pendalaman peran untuk menciptakan pengalaman interaksi yang nyata dan menyenangkan antar pemain.</p>
-                    </div>
-                </div>
-
-                <div class="glass-panel cyber-card interactive-btn col-span-1 p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] flex flex-col items-start gap-5 sm:gap-6 group relative overflow-hidden cursor-none">
-                    <div class="relative z-10 w-16 h-16 sm:w-20 sm:h-20 rounded-[1.5rem] sm:rounded-[2rem] bg-black/5 dark:bg-white/5 flex items-center justify-center text-4xl sm:text-5xl border border-black/10 dark:border-white/10 group-hover:scale-110 transition-transform duration-500 shadow-inner">⚖️</div>
-                    <div class="relative z-10 mt-auto">
-                        <h3 class="font-display font-black text-2xl sm:text-3xl text-slate-900 dark:text-white mb-2 sm:mb-3 group-hover:text-brand-400 transition-colors">Hukum & Keadilan</h3>
-                        <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base font-medium leading-relaxed">Kebebasan berekspresi sejalan dengan aturan. Kami menjaga ketertiban melalui penerapan sanksi yang adil.</p>
-                    </div>
-                </div>
-
-                <div class="glass-panel cyber-card interactive-btn col-span-1 md:col-span-2 p-6 sm:p-10 lg:p-12 rounded-[2rem] sm:rounded-[3rem] flex flex-col sm:flex-row items-center gap-6 sm:gap-10 group relative overflow-hidden cursor-none border-fuchsia-500/20">
-                    <div class="absolute inset-0 bg-gradient-to-tl from-fuchsia-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-                    <div class="relative z-10 w-20 h-20 sm:w-28 sm:h-28 shrink-0 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-4xl sm:text-6xl border border-black/10 dark:border-white/10 group-hover:scale-110 transition-transform duration-500 shadow-inner">🤝</div>
-                    <div class="relative z-10 text-center sm:text-left">
-                        <h3 class="font-display font-black text-2xl sm:text-4xl text-slate-900 dark:text-white mb-2 sm:mb-3 group-hover:text-fuchsia-400 transition-colors">Saling Menghargai</h3>
-                        <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-lg font-medium leading-relaxed">Dasar komunitas kami adalah rasa hormat. Kita menjunjung tinggi sportivitas antar sesama pemain dan pengurus.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="flex justify-center pt-10 pb-10 sm:pt-16 sm:pb-16">
-                <button @click="switchTab('rules')" class="interactive-btn group px-8 py-5 sm:px-14 sm:py-6 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-display font-black text-lg sm:text-2xl flex items-center gap-4 sm:hover:scale-110 active:scale-95 transition-all duration-500 shadow-[0_20px_50px_rgba(255,255,255,0.1)] dark:shadow-[0_20px_50px_rgba(255,255,255,0.2)] border-2 border-transparent hover:border-brand-500 dark:hover:border-brand-400 relative overflow-hidden cursor-none w-full max-w-sm sm:max-w-max justify-center">
-                    <div class="absolute inset-0 bg-white/20 dark:bg-black/10 -skew-x-12 translate-x-[-150%] group-hover:animate-shine-sweep"></div>
-                    <span class="relative z-10">Jelajahi Peraturan</span>
-                    <svg class="w-6 h-6 sm:w-8 sm:h-8 relative z-10 group-hover:translate-x-3 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                </button>
-            </div>
-        </div>
-
-        <!-- 2. RULES -->
-        <div x-show="activeTab === 'rules'" style="display: none;"
-             x-transition:enter="transition ease-out duration-700 delay-200"
-             x-transition:enter-start="opacity-0 translate-y-12"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             class="space-y-8 sm:space-y-12">
-            
-            <div class="text-center space-y-3 sm:space-y-4 mb-8 sm:mb-14">
-                <h2 class="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-black text-slate-900 dark:text-white tracking-tighter">Pusat <br class="block sm:hidden"><span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.3)]">Peraturan</span></h2>
-            </div>
-
-            <!-- Search Bar -->
-            <div class="max-w-3xl mx-auto relative group z-20">
-                <div class="absolute -inset-1.5 bg-gradient-to-r from-brand-400 via-fuchsia-500 to-brand-600 rounded-[1.5rem] sm:rounded-[2rem] blur-xl opacity-30 group-hover:opacity-80 transition duration-500"></div>
-                <div class="relative flex items-center glass-panel !bg-white/95 dark:!bg-[#0a0a0a]/95 rounded-[1.5rem] sm:rounded-[2rem] p-1.5 sm:p-2.5 border-2 border-slate-300 dark:border-white/10 shadow-2xl">
-                    <div class="pl-4 sm:pl-5 pr-2 sm:pr-4 text-slate-400">
-                        <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    </div>
-                    <input type="text" x-model="searchQuery" placeholder="Cari peraturan (misal: 'Ramming')..." 
-                           class="interactive-btn w-full bg-transparent border-none outline-none font-sans font-bold text-slate-900 dark:text-white placeholder-slate-400 py-3 sm:py-4 text-base sm:text-xl md:text-2xl cursor-none"
-                           @input="playSfx('tick')">
-                    <div class="hidden sm:flex items-center pr-5 opacity-40 font-mono text-sm font-bold tracking-widest pointer-events-none">
-                        CARI
-                    </div>
-                </div>
-            </div>
-
-            <!-- Kategori Rules -->
-            <div class="flex justify-center relative z-10 pt-4">
-                <div class="glass-panel p-1.5 sm:p-2 rounded-full flex gap-1 sm:gap-2 w-full max-w-2xl relative shadow-xl">
-                    <div class="absolute h-[calc(100%-12px)] sm:h-[calc(100%-16px)] top-1.5 sm:top-2 rounded-full bg-slate-200 dark:bg-white/15 shadow-sm transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) z-0"
-                         :style="getRuleIndicatorStyle()"></div>
-                    
-                    <button @click="switchRuleTab('ingame')" class="interactive-btn relative z-10 flex-1 py-3 sm:py-4 rounded-full text-xs sm:text-sm md:text-base font-display font-black cursor-none"
-                            :class="activeRuleTab === 'ingame' ? 'text-slate-900 dark:text-white' : 'text-slate-500'">🎮 In-Game</button>
-                    <button @click="switchRuleTab('bannedcars')" class="interactive-btn relative z-10 flex-1 py-3 sm:py-4 rounded-full text-xs sm:text-sm md:text-base font-display font-black cursor-none"
-                            :class="activeRuleTab === 'bannedcars' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-500'">🚫 Banned</button>
-                    <button @click="switchRuleTab('discord')" class="interactive-btn relative z-10 flex-1 py-3 sm:py-4 rounded-full text-xs sm:text-sm md:text-base font-display font-black cursor-none"
-                            :class="activeRuleTab === 'discord' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500'">💬 Discord</button>
-                </div>
-            </div>
-
-            <!-- In-Game Rules List -->
-            <div x-show="activeRuleTab === 'ingame'" class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-8 pt-4">
-                <template x-for="(rule, idx) in filteredInGameRules" :key="rule.id">
-                    <div class="glass-panel cyber-card interactive-btn p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] flex flex-col gap-3 sm:gap-5 cursor-none" 
-                         @click="toggleAccordion(rule.id)">
-                        <div class="flex justify-between items-start mb-1 sm:mb-2">
-                            <div class="w-14 h-14 sm:w-20 sm:h-20 shrink-0 rounded-2xl sm:rounded-[1.5rem] bg-gradient-to-br from-brand-400/20 to-brand-600/20 text-3xl sm:text-4xl flex items-center justify-center border border-brand-400/30 shadow-inner">
-                                <span x-text="rule.icon" class="drop-shadow-md"></span>
-                            </div>
-                            <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center transition-all duration-500" :class="openAccordion === rule.id ? 'rotate-180 bg-brand-500 text-white shadow-[0_0_15px_#6366f1]' : 'text-slate-400'">
-                                <svg class="w-5 h-5 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
-                            </div>
-                        </div>
-                        <h4 class="font-display font-black text-2xl sm:text-3xl tracking-tight text-slate-900 dark:text-white" x-text="rule.title"></h4>
-                        <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base md:text-lg font-medium" x-text="rule.desc"></p>
-                        
-                        <div x-show="openAccordion === rule.id" x-collapse>
-                            <div class="pt-4 sm:pt-6 mt-3 sm:mt-4 border-t-2 border-slate-200 dark:border-white/10 text-brand-600 dark:text-brand-300 font-bold text-sm sm:text-base md:text-lg leading-relaxed bg-brand-50/50 dark:bg-brand-900/40 p-4 sm:p-6 rounded-xl sm:rounded-2xl">
-                                <span x-text="rule.detail"></span>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-                <div x-show="filteredInGameRules.length === 0" class="col-span-full text-center py-12 text-slate-500 font-mono text-lg">
-                    ❌ Tidak ada hasil untuk pencarian ini
-                </div>
-            </div>
-
-            <!-- Banned Cars List -->
-            <div x-show="activeRuleTab === 'bannedcars'" style="display:none;" class="grid grid-cols-1 gap-4 sm:gap-6 max-w-4xl mx-auto pt-4">
-                <template x-for="(rule, idx) in filteredBannedCars" :key="rule.id">
-                    <div class="glass-panel cyber-card interactive-btn border-rose-300 dark:border-rose-500/30 p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] cursor-none" 
-                         @click="toggleAccordion(rule.id)">
-                        <div class="flex items-center justify-between gap-3 sm:gap-4">
-                            <div class="flex items-center gap-4 sm:gap-6">
-                                <span class="w-12 h-12 sm:w-16 sm:h-16 shrink-0 rounded-2xl bg-rose-400/20 text-rose-600 dark:text-rose-400 flex items-center justify-center font-black text-xl sm:text-3xl border border-rose-500/30">✖</span>
-                                <h4 class="font-display font-black text-lg sm:text-2xl text-slate-900 dark:text-white" x-text="rule.title"></h4>
-                            </div>
-                            <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center transition-all duration-500" :class="openAccordion === rule.id ? 'rotate-180 bg-rose-500 text-white shadow-[0_0_15px_#f43f5e]' : 'text-slate-400'">
-                                <svg class="w-5 h-5 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
-                            </div>
-                        </div>
-                        <div x-show="openAccordion === rule.id" x-collapse>
-                            <div class="pt-4 sm:pt-6 mt-4 sm:mt-5 border-t-2 border-rose-100 dark:border-rose-900/30 text-slate-600 dark:text-slate-300 text-sm sm:text-base md:text-lg font-medium leading-relaxed sm:pl-[5.5rem]">
-                                <span x-text="rule.desc"></span>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-                <div x-show="filteredBannedCars.length === 0" class="text-center py-12 text-slate-500 font-mono text-lg">
-                    ❌ Tidak ada hasil untuk pencarian ini
-                </div>
-            </div>
-
-            <!-- Discord Rules List -->
-            <div x-show="activeRuleTab === 'discord'" style="display:none;" class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-8 pt-4">
-                <template x-for="(rule, idx) in filteredDiscordRules" :key="rule.id">
-                    <div class="glass-panel cyber-card interactive-btn p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] flex flex-col gap-3 sm:gap-5 border-indigo-200 dark:border-indigo-500/30 cursor-none" 
-                         @click="toggleAccordion(rule.id)">
-                        <div class="flex justify-between items-start mb-1 sm:mb-2">
-                            <div class="w-14 h-14 sm:w-20 sm:h-20 shrink-0 rounded-2xl sm:rounded-[1.5rem] bg-indigo-500/20 text-3xl sm:text-4xl flex items-center justify-center border border-indigo-400/30 shadow-inner">
-                                <span x-text="rule.icon"></span>
-                            </div>
-                            <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center transition-all duration-500" :class="openAccordion === rule.id ? 'rotate-180 bg-indigo-500 text-white shadow-[0_0_15px_#6366f1]' : 'text-slate-400'">
-                                <svg class="w-5 h-5 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg>
-                            </div>
-                        </div>
-                        <h4 class="font-display font-black text-2xl sm:text-3xl tracking-tight text-slate-900 dark:text-white" x-text="rule.title"></h4>
-                        <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base md:text-lg font-medium" x-text="rule.desc"></p>
-                        
-                        <div x-show="openAccordion === rule.id" x-collapse>
-                            <div class="pt-4 sm:pt-6 mt-3 sm:mt-4 border-t-2 border-slate-200 dark:border-white/10 text-indigo-600 dark:text-indigo-300 font-bold text-sm sm:text-base md:text-lg bg-indigo-50/50 dark:bg-indigo-900/40 p-4 sm:p-6 rounded-xl sm:rounded-2xl">
-                                <span x-text="rule.detail"></span>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-                <div x-show="filteredDiscordRules.length === 0" class="col-span-full text-center py-12 text-slate-500 font-mono text-lg">
-                    ❌ Tidak ada hasil untuk pencarian ini
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. RECRUITMENT -->
-        <div x-show="activeTab === 'recruitment'" style="display: none;"
-             x-transition:enter="transition ease-out duration-700 delay-200"
-             x-transition:enter-start="opacity-0 translate-y-12"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             class="space-y-10 sm:space-y-16 max-w-5xl mx-auto">
-            
-            <div class="text-center space-y-4 mb-12 sm:mb-24">
-                <h2 class="font-display text-5xl sm:text-7xl lg:text-[6.5rem] font-black leading-tight tracking-tighter text-slate-900 dark:text-white">
-                    Info <span class="animated-text-bg bg-gradient-to-r from-brand-500 via-fuchsia-500 to-brand-500 animate-text-gradient drop-shadow-[0_0_20px_rgba(217,70,239,0.3)]">Rekrutmen</span>
-                </h2>
-            </div>
-
-            <div class="glass-panel cyber-card border-brand-400/40 p-8 sm:p-12 lg:p-16 rounded-[2rem] sm:rounded-[3.5rem] flex flex-col md:flex-row items-center gap-8 sm:gap-12 text-center md:text-left relative overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-r from-brand-500/10 to-transparent pointer-events-none"></div>
-                <div class="relative z-10 w-28 h-28 sm:w-36 sm:h-36 shrink-0 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-5xl sm:text-6xl shadow-[0_0_40px_rgba(99,102,241,0.5)] border-4 border-white/20">📢</div>
-                <div class="relative z-10 w-full">
-                    <h3 class="font-display font-black text-3xl sm:text-5xl mb-4 text-slate-900 dark:text-white">Jadwal & Pengumuman</h3>
-                    <p class="text-slate-600 dark:text-slate-300 text-base sm:text-lg lg:text-xl font-medium leading-relaxed">Rekrutmen diadakan secara berkala. Pantau terus kanal <br class="hidden lg:block"><code class="px-4 py-2 mt-4 inline-block bg-slate-200 dark:bg-[#030712] border border-slate-300 dark:border-white/10 rounded-xl text-brand-600 dark:text-brand-400 font-mono text-sm sm:text-lg font-bold shadow-inner">#announcements</code></p>
-                </div>
-            </div>
-            
-            <div class="glass-panel cyber-card border-fuchsia-400/40 p-8 sm:p-12 lg:p-16 rounded-[2rem] sm:rounded-[3.5rem] flex flex-col md:flex-row items-center gap-8 sm:gap-12 text-center md:text-left relative overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-r from-fuchsia-500/10 to-transparent pointer-events-none"></div>
-                <div class="relative z-10 w-28 h-28 sm:w-36 sm:h-36 shrink-0 rounded-full bg-gradient-to-br from-fuchsia-500 to-rose-500 flex items-center justify-center text-5xl sm:text-6xl shadow-[0_0_40px_rgba(217,70,239,0.5)] border-4 border-white/20">🎯</div>
-                <div class="relative z-10 w-full">
-                    <h3 class="font-display font-black text-3xl sm:text-5xl mb-4 text-slate-900 dark:text-white">Persyaratan Umum</h3>
-                    <p class="text-slate-600 dark:text-slate-300 text-base sm:text-lg lg:text-xl font-medium leading-relaxed">Kandidat wajib memiliki komitmen yang konsisten, memahami aturan dengan baik, serta dapat berkomunikasi dengan santun.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- 4. SESSION -->
-        <div x-show="activeTab === 'session'" style="display: none;"
-             x-transition:enter="transition ease-out duration-700 delay-200"
-             x-transition:enter-start="opacity-0 translate-y-12"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             class="space-y-12 sm:space-y-20">
-             
-             <div class="text-center space-y-4 mb-12 sm:mb-20">
-                <h2 class="font-display text-5xl sm:text-7xl lg:text-[6.5rem] font-black leading-tight tracking-tighter text-slate-900 dark:text-white">
-                    Status <span class="animated-text-bg bg-gradient-to-r from-emerald-400 via-cyan-500 to-emerald-400 animate-text-gradient drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]">Sesi</span>
-                </h2>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10 max-w-6xl mx-auto">
-                <div class="glass-panel cyber-card border-emerald-400/40 p-8 sm:p-12 lg:p-16 rounded-[2rem] sm:rounded-[3.5rem] text-center flex flex-col items-center gap-5 sm:gap-8 relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-b from-emerald-500/10 to-transparent pointer-events-none"></div>
-                    <div class="relative z-10 w-24 h-24 sm:w-32 sm:h-32 shrink-0 rounded-2xl sm:rounded-[2.5rem] bg-emerald-400/20 text-emerald-400 flex items-center justify-center text-5xl sm:text-6xl border-2 border-emerald-400/50 shadow-[0_0_30px_rgba(16,185,129,0.3)]">🎮</div>
-                    <h3 class="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-slate-900 dark:text-white relative z-10">Jadwal Operasional</h3>
-                    <p class="text-slate-600 dark:text-slate-300 text-base sm:text-lg lg:text-xl font-medium leading-relaxed relative z-10">Sesi roleplay dibuka sesuai pengumuman di Discord. Silakan bersiap sebelum waktu yang ditentukan.</p>
-                </div>
-                <div class="glass-panel cyber-card border-cyan-400/40 p-8 sm:p-12 lg:p-16 rounded-[2rem] sm:rounded-[3.5rem] text-center flex flex-col items-center gap-5 sm:gap-8 relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-b from-cyan-500/10 to-transparent pointer-events-none"></div>
-                    <div class="relative z-10 w-24 h-24 sm:w-32 sm:h-32 shrink-0 rounded-2xl sm:rounded-[2.5rem] bg-cyan-400/20 text-cyan-400 flex items-center justify-center text-5xl sm:text-6xl border-2 border-cyan-400/50 shadow-[0_0_30px_rgba(6,182,212,0.3)]">🔗</div>
-                    <h3 class="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-slate-900 dark:text-white relative z-10">Akses Server</h3>
-                    <p class="text-slate-600 dark:text-slate-300 text-base sm:text-lg lg:text-xl font-medium leading-relaxed relative z-10">Tautan private server Roblox didistribusikan melalui kanal khusus beberapa menit sebelum sesi dimulai.</p>
-                </div>
-            </div>
-
-            <div class="max-w-2xl mx-auto glass-panel p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] text-center space-y-5 sm:space-y-6">
-                <h3 class="font-display font-black text-2xl sm:text-3xl">Pintasan Informasi</h3>
-                <div class="flex flex-wrap justify-center gap-3 sm:gap-4">
-                    <button @click="copyToClipboard('https://discord.gg/QmN7Su3Adm', 'Tautan berhasil disalin!')" class="interactive-btn px-6 py-4 sm:px-10 sm:py-5 rounded-2xl sm:rounded-[1.5rem] bg-brand-500/20 border border-brand-500/50 text-brand-600 dark:text-brand-300 font-bold hover:scale-105 active:scale-95 transition-all cursor-none text-base sm:text-xl w-full sm:w-auto shadow-[0_0_20px_rgba(99,102,241,0.2)]">📋 Salin Tautan Discord</button>
-                </div>
-            </div>
-
-            <!-- DISCORD BUTTON -->
-            <div class="flex justify-center pt-8 sm:pt-10 pb-10 sm:pb-16">
-                <div class="relative group w-full max-w-5xl px-0 sm:px-4">
-                    <div class="absolute -inset-2 sm:-inset-8 bg-gradient-to-r from-indigo-500 via-brand-500 to-fuchsia-500 rounded-[3rem] sm:rounded-[6rem] blur-2xl sm:blur-3xl opacity-40 group-hover:opacity-100 transition duration-1000"></div>
-                    
-                    <button @click="startDiscordFlow()" class="interactive-btn relative w-full overflow-hidden glass-panel !bg-white/95 dark:!bg-[#0a0a0a]/95 p-8 sm:p-12 lg:p-16 rounded-[2.5rem] sm:rounded-[5rem] flex flex-col md:flex-row items-center gap-8 sm:gap-10 lg:gap-14 transform md:hover:scale-[1.02] active:scale-95 transition-all duration-500 shadow-[0_30px_60px_rgba(0,0,0,0.5)] cursor-none border-2 border-indigo-500/30">
-                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-brand-400/20 dark:via-white/10 to-transparent -skew-x-12 -translate-x-[150%] group-hover:animate-shine-sweep"></div>
-                        
-                        <div class="relative z-10 w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 shrink-0 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center border-4 border-indigo-300 dark:border-indigo-400/60 shadow-[0_0_50px_rgba(99,102,241,0.8)] group-hover:scale-110 transition-transform duration-500">
-                            <svg class="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 text-indigo-600 dark:text-indigo-400 drop-shadow-[0_0_10px_rgba(99,102,241,0.8)]" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
-                        </div>
-                        <div class="relative z-10 text-center md:text-left flex-1 w-full">
-                            <div class="font-display font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tighter text-slate-900 dark:text-white break-words">AKSES DISCORD</div>
-                            <div class="text-brand-600 dark:text-brand-400 font-mono text-base sm:text-xl lg:text-3xl font-bold tracking-[0.2em] sm:tracking-[0.4em] mt-2 sm:mt-4">SERVER RESMI KOMUNITAS</div>
-                        </div>
+                <div class="flex justify-center pt-10 pb-10 sm:pt-16 sm:pb-16">
+                    <button @click="switchTab('rules')" class="interactive-btn group px-8 py-5 sm:px-14 sm:py-6 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-display font-black text-lg sm:text-2xl flex items-center gap-4 sm:hover:scale-110 active:scale-95 transition-all duration-500 shadow-[0_20px_50px_rgba(15,23,42,0.2)] dark:shadow-[0_20px_50px_rgba(255,255,255,0.2)] border-2 border-transparent hover:border-brand-500 dark:hover:border-brand-400 relative overflow-hidden cursor-none w-full max-w-sm sm:max-w-max justify-center">
+                        <div class="absolute inset-0 bg-white/20 dark:bg-black/10 -skew-x-12 translate-x-[-150%] group-hover:animate-shine-sweep"></div>
+                        <span class="relative z-10">Jelajahi Peraturan</span>
+                        <svg class="w-6 h-6 sm:w-8 sm:h-8 relative z-10 group-hover:translate-x-3 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </button>
                 </div>
             </div>
+
+            <!-- 2. RULES -->
+            <div x-show="activeTab === 'rules'" style="display: none;"
+                 x-transition:enter="transition ease-out duration-700 delay-200"
+                 x-transition:enter-start="opacity-0 translate-y-12"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 class="space-y-8 sm:space-y-12">
+                
+                <div class="text-center space-y-3 sm:space-y-4 mb-8 sm:mb-14">
+                    <h2 class="font-display text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-black text-slate-900 dark:text-white tracking-tighter">Pusat <br class="block sm:hidden"><span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 to-fuchsia-500 drop-shadow-[0_0_15px_rgba(217,70,239,0.3)]">Peraturan</span></h2>
+                </div>
+
+                <div class="max-w-3xl mx-auto relative group z-20">
+                    <div class="absolute -inset-1.5 bg-gradient-to-r from-brand-400 via-fuchsia-500 to-brand-600 rounded-[1.5rem] sm:rounded-[2rem] blur-xl opacity-20 dark:opacity-30 group-hover:opacity-60 dark:group-hover:opacity-80 transition duration-500"></div>
+                    <div class="relative flex items-center panel rounded-[1.5rem] sm:rounded-[2rem] p-1.5 sm:p-2.5 shadow-2xl transition-all duration-700">
+                        <div class="pl-4 sm:pl-5 pr-2 sm:pr-4 text-slate-400">
+                            <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                        <input type="text" x-model="searchQuery" placeholder="Cari peraturan (misal: 'Ramming')..." 
+                               class="interactive-btn w-full bg-transparent border-none outline-none font-sans font-bold text-slate-900 dark:text-white placeholder-slate-400 py-3 sm:py-4 text-base sm:text-xl md:text-2xl cursor-none"
+                               @input="playSfx('tick')">
+                    </div>
+                </div>
+
+                <div class="flex justify-center relative z-10 pt-4">
+                    <div class="panel p-1.5 sm:p-2 rounded-full flex gap-1 sm:gap-2 w-full max-w-2xl relative shadow-xl transition-all duration-700">
+                        <div class="absolute h-[calc(100%-12px)] sm:h-[calc(100%-16px)] top-1.5 sm:top-2 rounded-full bg-slate-200 dark:bg-white/15 shadow-sm transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) z-0" :style="getRuleIndicatorStyle()"></div>
+                        <button @click="switchRuleTab('ingame')" class="interactive-btn relative z-10 flex-1 py-3 sm:py-4 rounded-full text-xs sm:text-sm md:text-base font-display font-black cursor-none" :class="activeRuleTab === 'ingame' ? 'text-slate-900 dark:text-white' : 'text-slate-500'">🎮 In-Game</button>
+                        <button @click="switchRuleTab('bannedcars')" class="interactive-btn relative z-10 flex-1 py-3 sm:py-4 rounded-full text-xs sm:text-sm md:text-base font-display font-black cursor-none" :class="activeRuleTab === 'bannedcars' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-500'">🚫 Banned</button>
+                        <button @click="switchRuleTab('discord')" class="interactive-btn relative z-10 flex-1 py-3 sm:py-4 rounded-full text-xs sm:text-sm md:text-base font-display font-black cursor-none" :class="activeRuleTab === 'discord' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500'">💬 Discord</button>
+                    </div>
+                </div>
+
+                <!-- Rules Listing Sama Sempurnanya -->
+                <div x-show="activeRuleTab === 'ingame'" class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-8 pt-4">
+                    <template x-for="(rule, idx) in filteredInGameRules" :key="rule.id">
+                        <div class="panel cyber-card interactive-btn p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] flex flex-col gap-3 sm:gap-5 cursor-none" @click="toggleAccordion(rule.id)">
+                            <div class="flex justify-between items-start mb-1 sm:mb-2">
+                                <div class="w-14 h-14 sm:w-20 sm:h-20 shrink-0 rounded-2xl sm:rounded-[1.5rem] bg-brand-100 dark:bg-brand-600/20 text-3xl sm:text-4xl flex items-center justify-center border border-brand-200 dark:border-brand-400/30 shadow-inner"><span x-text="rule.icon" class="drop-shadow-md"></span></div>
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center transition-all duration-500 border border-slate-200 dark:border-transparent" :class="openAccordion === rule.id ? 'rotate-180 bg-brand-500 text-white border-brand-500 shadow-[0_0_15px_#6366f1]' : 'text-slate-400'"><svg class="w-5 h-5 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg></div>
+                            </div>
+                            <h4 class="font-display font-black text-2xl sm:text-3xl tracking-tight text-slate-900 dark:text-white" x-text="rule.title"></h4>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base md:text-lg font-medium" x-text="rule.desc"></p>
+                            <div x-show="openAccordion === rule.id" x-collapse><div class="pt-4 sm:pt-6 mt-3 sm:mt-4 border-t border-slate-200 dark:border-white/10 text-brand-700 dark:text-brand-400 font-bold text-sm sm:text-base md:text-lg leading-relaxed p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-slate-100/50 dark:bg-black/20"><span x-text="rule.detail"></span></div></div>
+                        </div>
+                    </template>
+                </div>
+                
+                <div x-show="activeRuleTab === 'bannedcars'" style="display:none;" class="grid grid-cols-1 gap-4 sm:gap-6 max-w-4xl mx-auto pt-4">
+                    <template x-for="(rule, idx) in filteredBannedCars" :key="rule.id">
+                        <div class="panel cyber-card interactive-btn p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] cursor-none" @click="toggleAccordion(rule.id)">
+                            <div class="flex items-center justify-between gap-3 sm:gap-4">
+                                <div class="flex items-center gap-4 sm:gap-6">
+                                    <span class="w-12 h-12 sm:w-16 sm:h-16 shrink-0 rounded-2xl bg-rose-100 dark:bg-rose-400/20 text-rose-600 dark:text-rose-400 flex items-center justify-center font-black text-xl sm:text-3xl border border-rose-200 dark:border-rose-500/30">✖</span>
+                                    <h4 class="font-display font-black text-lg sm:text-2xl text-slate-900 dark:text-white" x-text="rule.title"></h4>
+                                </div>
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center transition-all duration-500 border border-slate-200 dark:border-transparent" :class="openAccordion === rule.id ? 'rotate-180 bg-rose-500 text-white border-rose-500 shadow-[0_0_15px_#f43f5e]' : 'text-slate-400'"><svg class="w-5 h-5 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg></div>
+                            </div>
+                            <div x-show="openAccordion === rule.id" x-collapse><div class="pt-4 sm:pt-6 mt-4 sm:mt-5 border-t border-rose-100 dark:border-rose-900/30 text-slate-600 dark:text-slate-300 text-sm sm:text-base md:text-lg font-medium leading-relaxed sm:pl-[5.5rem]"><span x-text="rule.desc"></span></div></div>
+                        </div>
+                    </template>
+                </div>
+
+                <div x-show="activeRuleTab === 'discord'" style="display:none;" class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-8 pt-4">
+                    <template x-for="(rule, idx) in filteredDiscordRules" :key="rule.id">
+                        <div class="panel cyber-card interactive-btn p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] flex flex-col gap-3 sm:gap-5 cursor-none" @click="toggleAccordion(rule.id)">
+                            <div class="flex justify-between items-start mb-1 sm:mb-2">
+                                <div class="w-14 h-14 sm:w-20 sm:h-20 shrink-0 rounded-2xl sm:rounded-[1.5rem] bg-indigo-100 dark:bg-indigo-500/20 text-3xl sm:text-4xl flex items-center justify-center border border-indigo-200 dark:border-indigo-400/30 shadow-inner"><span x-text="rule.icon"></span></div>
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center transition-all duration-500 border border-slate-200 dark:border-transparent" :class="openAccordion === rule.id ? 'rotate-180 bg-indigo-500 text-white border-indigo-500 shadow-[0_0_15px_#6366f1]' : 'text-slate-400'"><svg class="w-5 h-5 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path></svg></div>
+                            </div>
+                            <h4 class="font-display font-black text-2xl sm:text-3xl tracking-tight text-slate-900 dark:text-white" x-text="rule.title"></h4>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base md:text-lg font-medium" x-text="rule.desc"></p>
+                            <div x-show="openAccordion === rule.id" x-collapse><div class="pt-4 sm:pt-6 mt-3 sm:mt-4 border-t border-slate-200 dark:border-white/10 text-indigo-700 dark:text-indigo-400 font-bold text-sm sm:text-base md:text-lg bg-slate-100/50 dark:bg-black/20 p-4 sm:p-6 rounded-xl sm:rounded-2xl"><span x-text="rule.detail"></span></div></div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- 3. RECRUITMENT -->
+            <div x-show="activeTab === 'recruitment'" style="display: none;"
+                 x-transition:enter="transition ease-out duration-700 delay-200"
+                 x-transition:enter-start="opacity-0 translate-y-12"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 class="space-y-10 sm:space-y-16 max-w-5xl mx-auto">
+                <div class="text-center space-y-4 mb-12 sm:mb-24">
+                    <h2 class="font-display text-5xl sm:text-7xl lg:text-[6.5rem] font-black leading-tight tracking-tighter text-slate-900 dark:text-white">Info <span class="animated-text-bg bg-gradient-to-r from-brand-500 via-fuchsia-500 to-brand-500 animate-text-gradient drop-shadow-[0_0_20px_rgba(217,70,239,0.3)]">Rekrutmen</span></h2>
+                </div>
+                
+                <div class="panel cyber-card p-8 sm:p-12 lg:p-16 rounded-[2rem] sm:rounded-[3.5rem] flex flex-col md:flex-row items-center gap-8 sm:gap-12 text-center md:text-left relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-brand-500/10 to-transparent pointer-events-none"></div>
+                    <div class="relative z-10 w-28 h-28 sm:w-36 sm:h-36 shrink-0 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-5xl sm:text-6xl shadow-[0_0_40px_rgba(99,102,241,0.3)] border-4 border-white/20">📢</div>
+                    <div class="relative z-10 w-full">
+                        <h3 class="font-display font-black text-3xl sm:text-5xl mb-4 text-slate-900 dark:text-white">Jadwal & Pengumuman</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-base sm:text-lg lg:text-xl font-medium leading-relaxed">Rekrutmen diadakan secara berkala. Pantau terus kanal <br class="hidden lg:block"><code class="px-4 py-2 mt-4 inline-block bg-slate-100 dark:bg-[#030712] border border-slate-300 dark:border-white/10 rounded-xl text-brand-600 dark:text-brand-400 font-mono text-sm sm:text-lg font-bold shadow-inner">#announcements</code></p>
+                    </div>
+                </div>
+
+                <div class="panel cyber-card p-8 sm:p-12 lg:p-16 rounded-[2rem] sm:rounded-[3.5rem] flex flex-col md:flex-row items-center gap-8 sm:gap-12 text-center md:text-left relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-fuchsia-500/10 to-transparent pointer-events-none"></div>
+                    <div class="relative z-10 w-28 h-28 sm:w-36 sm:h-36 shrink-0 rounded-full bg-gradient-to-br from-fuchsia-500 to-rose-500 flex items-center justify-center text-5xl sm:text-6xl shadow-[0_0_40px_rgba(217,70,239,0.3)] border-4 border-white/20">🎯</div>
+                    <div class="relative z-10 w-full">
+                        <h3 class="font-display font-black text-3xl sm:text-5xl mb-4 text-slate-900 dark:text-white">Persyaratan Umum</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-base sm:text-lg lg:text-xl font-medium leading-relaxed">Kandidat wajib memiliki komitmen yang konsisten, memahami aturan dengan baik, serta dapat berkomunikasi dengan santun.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. SESSION & DISCORD -->
+            <div x-show="activeTab === 'session'" style="display: none;"
+                 x-transition:enter="transition ease-out duration-700 delay-200"
+                 x-transition:enter-start="opacity-0 translate-y-12"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 class="space-y-12 sm:space-y-20">
+                 
+                 <div class="text-center space-y-4 mb-12 sm:mb-20">
+                    <h2 class="font-display text-5xl sm:text-7xl lg:text-[6.5rem] font-black leading-tight tracking-tighter text-slate-900 dark:text-white">
+                        Status <span class="animated-text-bg bg-gradient-to-r from-emerald-500 via-cyan-500 to-emerald-500 animate-text-gradient drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]">Sesi</span>
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10 max-w-6xl mx-auto">
+                    <div class="panel cyber-card p-8 sm:p-12 lg:p-16 rounded-[2rem] sm:rounded-[3.5rem] text-center flex flex-col items-center gap-5 sm:gap-8 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-b from-emerald-500/10 to-transparent pointer-events-none"></div>
+                        <div class="relative z-10 w-24 h-24 sm:w-32 sm:h-32 shrink-0 rounded-2xl sm:rounded-[2.5rem] bg-emerald-100 dark:bg-emerald-400/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-5xl sm:text-6xl border-2 border-emerald-300 dark:border-emerald-400/50 shadow-[0_0_30px_rgba(16,185,129,0.2)]">🎮</div>
+                        <h3 class="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-slate-900 dark:text-white relative z-10">Jadwal Operasional</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-base sm:text-lg lg:text-xl font-medium leading-relaxed relative z-10">Sesi roleplay dibuka sesuai pengumuman di Discord. Silakan bersiap sebelum waktu yang ditentukan.</p>
+                    </div>
+                    <div class="panel cyber-card p-8 sm:p-12 lg:p-16 rounded-[2rem] sm:rounded-[3.5rem] text-center flex flex-col items-center gap-5 sm:gap-8 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-b from-cyan-500/10 to-transparent pointer-events-none"></div>
+                        <div class="relative z-10 w-24 h-24 sm:w-32 sm:h-32 shrink-0 rounded-2xl sm:rounded-[2.5rem] bg-cyan-100 dark:bg-cyan-400/20 text-cyan-600 dark:text-cyan-400 flex items-center justify-center text-5xl sm:text-6xl border-2 border-cyan-300 dark:border-cyan-400/50 shadow-[0_0_30px_rgba(6,182,212,0.2)]">🔗</div>
+                        <h3 class="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-slate-900 dark:text-white relative z-10">Akses Server</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-base sm:text-lg lg:text-xl font-medium leading-relaxed relative z-10">Tautan private server Roblox didistribusikan melalui kanal khusus beberapa menit sebelum sesi dimulai.</p>
+                    </div>
+                </div>
+
+                <div class="max-w-2xl mx-auto panel p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] text-center space-y-5 sm:space-y-6">
+                    <h3 class="font-display font-black text-2xl sm:text-3xl">Pintasan Informasi</h3>
+                    <div class="flex flex-wrap justify-center gap-3 sm:gap-4">
+                        <button @click="copyToClipboard('https://discord.gg/QmN7Su3Adm', 'Tautan berhasil disalin!')" class="interactive-btn px-6 py-4 sm:px-10 sm:py-5 rounded-2xl sm:rounded-[1.5rem] bg-brand-500/10 dark:bg-brand-500/20 border border-brand-500/30 dark:border-brand-500/50 text-brand-600 dark:text-brand-300 font-bold hover:scale-105 active:scale-95 transition-all cursor-none text-base sm:text-xl w-full sm:w-auto shadow-[0_0_20px_rgba(99,102,241,0.1)]">📋 Salin Tautan Discord</button>
+                    </div>
+                </div>
+
+                <div class="flex justify-center pt-4 pb-10">
+                    <div class="relative group w-full max-w-5xl px-0 sm:px-4">
+                        <div class="absolute -inset-2 sm:-inset-8 bg-gradient-to-r from-indigo-500 via-brand-500 to-fuchsia-500 rounded-[3rem] sm:rounded-[6rem] blur-2xl sm:blur-3xl opacity-30 dark:opacity-50 group-hover:opacity-60 dark:group-hover:opacity-100 transition duration-1000"></div>
+                        <button @click="startDiscordFlow()" class="interactive-btn relative w-full overflow-hidden panel p-8 sm:p-12 lg:p-16 rounded-[2.5rem] sm:rounded-[5rem] flex flex-col md:flex-row items-center gap-8 sm:gap-10 lg:gap-14 transform md:hover:scale-[1.02] active:scale-95 transition-all duration-500 shadow-[0_30px_60px_rgba(0,0,0,0.1)] dark:shadow-[0_30px_60px_rgba(0,0,0,0.5)] cursor-none border-2 hover:border-indigo-400/50">
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-brand-400/10 dark:via-white/10 to-transparent -skew-x-12 -translate-x-[150%] group-hover:animate-shine-sweep"></div>
+                            <div class="relative z-10 w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 shrink-0 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center border-4 border-indigo-200 dark:border-indigo-400/60 shadow-[0_0_50px_rgba(99,102,241,0.3)] dark:shadow-[0_0_50px_rgba(99,102,241,0.8)] group-hover:scale-110 transition-transform duration-500">
+                                <svg class="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 text-indigo-600 dark:text-indigo-400 drop-shadow-[0_0_10px_rgba(99,102,241,0.4)] dark:drop-shadow-[0_0_10px_rgba(99,102,241,0.8)]" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+                            </div>
+                            <div class="relative z-10 text-center md:text-left flex-1 w-full">
+                                <div class="font-display font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tighter text-slate-900 dark:text-white break-words leading-none">AKSES DISCORD</div>
+                                <div class="text-brand-600 dark:text-brand-400 font-mono text-base sm:text-xl lg:text-2xl font-bold tracking-[0.2em] sm:tracking-[0.4em] mt-3 sm:mt-4 uppercase">Server Resmi Komunitas</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- SETTINGS MODAL (TETAP) -->
+    <div x-show="settingsModal" style="display: none;" x-cloak class="fixed inset-0 z-[1000] flex items-center justify-center p-4 sm:p-6">
+         <div x-show="settingsModal" 
+              x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 backdrop-blur-none" x-transition:enter-end="opacity-100 backdrop-blur-[30px]"
+              x-transition:leave="transition ease-in duration-500" x-transition:leave-start="opacity-100 backdrop-blur-[30px]" x-transition:leave-end="opacity-0 backdrop-blur-none"
+              class="absolute inset-0 bg-slate-900/60 dark:bg-black/60" @click="closeSettings()"></div>
+
+         <div x-show="settingsModal"
+              x-transition:enter="transition transform ease-[cubic-bezier(0.34,1.56,0.64,1)] duration-700 delay-100" x-transition:enter-start="opacity-0 translate-y-32 scale-90" x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+              x-transition:leave="transition transform ease-[cubic-bezier(0.16,1,0.3,1)] duration-500" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-24 scale-95"
+              class="w-full max-w-2xl p-6 sm:p-10 panel rounded-[2rem] sm:rounded-[3rem] shadow-[0_50px_100px_rgba(0,0,0,0.3)] dark:shadow-[0_50px_100px_rgba(0,0,0,0.8)] relative overflow-hidden max-h-[90vh] overflow-y-auto z-10 border-2 border-brand-500/30 dark:border-brand-500/50">
+             
+             <div class="absolute top-[-20%] right-[-20%] w-[60%] h-[60%] bg-brand-500/20 blur-[80px] rounded-full pointer-events-none"></div>
+
+             <div class="flex justify-between items-center mb-8 sm:mb-10 relative z-10">
+                 <div class="flex items-center gap-4">
+                     <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-[1rem] sm:rounded-[1.5rem] bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white shadow-[0_0_20px_rgba(99,102,241,0.5)]"><svg class="w-6 h-6 sm:w-8 sm:h-8 animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div>
+                     <div>
+                         <h3 class="font-display font-black text-3xl sm:text-4xl text-slate-900 dark:text-white leading-none">Pengaturan</h3>
+                         <p class="font-mono text-[10px] sm:text-xs text-brand-600 dark:text-brand-400 font-bold uppercase tracking-widest mt-1.5">Sistem Preferensi Utama</p>
+                     </div>
+                 </div>
+                 <button @click="closeSettings()" class="interactive-btn w-12 h-12 rounded-full bg-slate-200 dark:bg-white/10 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-rose-500 hover:text-white transition-all duration-300 cursor-none border border-transparent dark:border-white/10 active:scale-90 shadow-inner hover:shadow-lg"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+             </div>
+
+             <div class="space-y-4 sm:space-y-5 relative z-10">
+                 <!-- TEMA -->
+                 <div class="interactive-btn flex items-center justify-between p-5 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] bg-white/50 dark:bg-black/20 border border-slate-200 dark:border-white/10 cursor-none hover:border-brand-400/50 hover:bg-white/80 dark:hover:bg-black/40 transition-all shadow-sm hover:shadow-md" @click="toggleTheme()">
+                     <div class="flex items-center gap-4 sm:gap-5">
+                         <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-brand-100 dark:bg-brand-500/20 flex items-center justify-center text-brand-600 dark:text-brand-400 border border-brand-200 dark:border-brand-500/30"><svg x-show="!isDark" class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><svg x-show="isDark" class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg></div>
+                         <div><div class="font-display font-black text-slate-900 dark:text-white text-lg sm:text-xl">Tema Sistem</div><div class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5" x-text="isDark ? 'Mode Gelap Aktif' : 'Mode Terang Aktif'"></div></div>
+                     </div>
+                     <div class="toggle-switch relative w-16 h-9 sm:w-20 sm:h-10 rounded-full shadow-inner border border-slate-300 dark:border-transparent flex items-center px-1" :class="isDark ? 'bg-brand-500' : 'bg-slate-300'"><div class="toggle-knob absolute w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-300" :class="isDark ? 'left-[36px] sm:left-[44px]' : 'left-1'"><div class="w-2 h-2 rounded-full" :class="isDark ? 'bg-brand-500' : 'bg-slate-400'"></div></div></div>
+                 </div>
+                 <!-- SFX -->
+                 <div class="interactive-btn flex items-center justify-between p-5 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] bg-white/50 dark:bg-black/20 border border-slate-200 dark:border-white/10 cursor-none hover:border-fuchsia-400/50 hover:bg-white/80 dark:hover:bg-black/40 transition-all shadow-sm hover:shadow-md" @click="toggleSfx()">
+                     <div class="flex items-center gap-4 sm:gap-5">
+                         <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-fuchsia-100 dark:bg-fuchsia-500/20 flex items-center justify-center text-fuchsia-600 dark:text-fuchsia-400 border border-fuchsia-200 dark:border-fuchsia-500/30"><svg x-show="sfxEnabled" class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5 11h4l5-5v12l-5-5H5z"></path></svg><svg x-show="!sfxEnabled" class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h2.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg></div>
+                         <div><div class="font-display font-black text-slate-900 dark:text-white text-lg sm:text-xl">Efek Suara (SFX)</div><div class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5" x-text="sfxEnabled ? 'Suara antarmuka menyala' : 'Sistem disenyapkan'"></div></div>
+                     </div>
+                     <div class="toggle-switch relative w-16 h-9 sm:w-20 sm:h-10 rounded-full shadow-inner border border-slate-300 dark:border-transparent flex items-center px-1" :class="sfxEnabled ? 'bg-fuchsia-500' : 'bg-slate-300 dark:bg-slate-700'"><div class="toggle-knob absolute w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-300" :class="sfxEnabled ? 'left-[36px] sm:left-[44px]' : 'left-1'"><div class="w-2 h-2 rounded-full" :class="sfxEnabled ? 'bg-fuchsia-500' : 'bg-slate-400'"></div></div></div>
+                 </div>
+                 <!-- ANIMASI -->
+                 <div class="interactive-btn flex items-center justify-between p-5 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] bg-white/50 dark:bg-black/20 border border-slate-200 dark:border-white/10 cursor-none hover:border-cyan-400/50 hover:bg-white/80 dark:hover:bg-black/40 transition-all shadow-sm hover:shadow-md" @click="toggleAnimations()">
+                     <div class="flex items-center gap-4 sm:gap-5">
+                         <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-cyan-100 dark:bg-cyan-500/20 flex items-center justify-center text-cyan-600 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-500/30"><svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg></div>
+                         <div><div class="font-display font-black text-slate-900 dark:text-white text-lg sm:text-xl">Animasi Latar</div><div class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5" x-text="animationsEnabled ? 'Penuh efek gerak visual' : 'Hemat baterai (Statis)'"></div></div>
+                     </div>
+                     <div class="toggle-switch relative w-16 h-9 sm:w-20 sm:h-10 rounded-full shadow-inner border border-slate-300 dark:border-transparent flex items-center px-1" :class="animationsEnabled ? 'bg-cyan-500' : 'bg-slate-300 dark:bg-slate-700'"><div class="toggle-knob absolute w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-300" :class="animationsEnabled ? 'left-[36px] sm:left-[44px]' : 'left-1'"><div class="w-2 h-2 rounded-full" :class="animationsEnabled ? 'bg-cyan-500' : 'bg-slate-400'"></div></div></div>
+                 </div>
+                 <!-- KURSOR -->
+                 <div class="interactive-btn flex items-center justify-between p-5 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] bg-white/50 dark:bg-black/20 border border-slate-200 dark:border-white/10 cursor-none hover:border-emerald-400/50 hover:bg-white/80 dark:hover:bg-black/40 transition-all shadow-sm hover:shadow-md" @click="toggleCursor()">
+                     <div class="flex items-center gap-4 sm:gap-5">
+                         <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30"><svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg></div>
+                         <div><div class="font-display font-black text-slate-900 dark:text-white text-lg sm:text-xl">Kursor Magnetik</div><div class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5" x-text="customCursor ? 'Kursor gaya futuristik' : 'Kursor bawaan sistem'"></div></div>
+                     </div>
+                     <div class="toggle-switch relative w-16 h-9 sm:w-20 sm:h-10 rounded-full shadow-inner border border-slate-300 dark:border-transparent flex items-center px-1" :class="customCursor ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'"><div class="toggle-knob absolute w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-300" :class="customCursor ? 'left-[36px] sm:left-[44px]' : 'left-1'"><div class="w-2 h-2 rounded-full" :class="customCursor ? 'bg-emerald-500' : 'bg-slate-400'"></div></div></div>
+                 </div>
+             </div>
+             
+             <div class="mt-10 sm:mt-12 text-center relative z-10">
+                 <button @click="closeSettings()" class="interactive-btn w-full sm:w-auto px-12 py-5 rounded-full font-display font-black text-white text-xl bg-gradient-to-r from-brand-500 via-fuchsia-500 to-brand-500 bg-[length:200%_auto] hover:bg-[position:100%_0] shadow-[0_15px_30px_rgba(99,102,241,0.4)] hover:shadow-[0_20px_40px_rgba(217,70,239,0.5)] active:scale-95 transition-all duration-500 cursor-none">Simpan & Tutup</button>
+             </div>
         </div>
+    </div>
 
-    </main>
-
-    <!-- MODAL AKSES DISCORD DENGAN PROGRESS BAR -->
-    <div x-show="discordModal" style="display: none;" x-cloak
-         class="fixed inset-0 z-[1000] flex items-center justify-center p-4">
-         
+    <!-- HUD DISCORD COUNTDOWN -->
+    <div x-show="discordModal" style="display: none;" x-cloak class="fixed inset-0 z-[1000] flex items-center justify-center p-4">
          <div x-show="discordModal" 
-              x-transition:enter="transition ease-out duration-500"
-              x-transition:enter-start="opacity-0 backdrop-blur-none"
-              x-transition:enter-end="opacity-100 backdrop-blur-[60px]"
-              x-transition:leave="transition ease-in duration-400"
-              x-transition:leave-start="opacity-100 backdrop-blur-[60px]"
-              x-transition:leave-end="opacity-0 backdrop-blur-none"
-              class="absolute inset-0 bg-slate-900/80"></div>
+              x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 backdrop-blur-none" x-transition:enter-end="opacity-100 backdrop-blur-[60px]"
+              x-transition:leave="transition ease-in duration-500" x-transition:leave-start="opacity-100 backdrop-blur-[60px]" x-transition:leave-end="opacity-0 backdrop-blur-none"
+              class="absolute inset-0 bg-slate-900/90 dark:bg-black/90" @click="cancelDiscordFlow()"></div>
 
          <div x-show="discordModal"
-              x-transition:enter="transition transform ease-[cubic-bezier(0.34,1.56,0.64,1)] duration-700 delay-100"
-              x-transition:enter-start="opacity-0 translate-y-32 scale-75"
-              x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-              x-transition:leave="transition transform ease-[cubic-bezier(0.16,1,0.3,1)] duration-400"
-              x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-              x-transition:leave-end="opacity-0 translate-y-16 scale-90"
-              class="w-full max-w-2xl p-8 sm:p-12 lg:p-16 glass-panel !bg-white/95 dark:!bg-[#0a0a0a]/95 rounded-[3rem] sm:rounded-[4rem] shadow-[0_50px_100px_rgba(0,0,0,0.8)] text-center relative overflow-hidden border-2 border-brand-500/40 max-h-[90vh] overflow-y-auto z-10">
+              x-transition:enter="transition transform ease-[cubic-bezier(0.34,1.56,0.64,1)] duration-1000 delay-100" x-transition:enter-start="opacity-0 translate-y-32 scale-75 rotate-3" x-transition:enter-end="opacity-100 translate-y-0 scale-100 rotate-0"
+              x-transition:leave="transition transform ease-[cubic-bezier(0.16,1,0.3,1)] duration-500" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-24 scale-90"
+              class="w-full max-w-3xl p-8 sm:p-12 lg:p-16 panel rounded-[3rem] sm:rounded-[4rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] dark:shadow-[0_0_100px_rgba(99,102,241,0.2)] text-center relative overflow-hidden z-10 border-2 border-brand-500/30">
              
-             <h3 class="font-display font-black text-3xl sm:text-4xl lg:text-5xl mb-3 sm:mb-4 relative z-10 uppercase tracking-tight">Otentikasi Akses</h3>
-             <p class="text-slate-500 dark:text-slate-400 text-base sm:text-xl font-medium mb-10 sm:mb-14 relative z-10">Menyiapkan koneksi menuju server The Mastreo...</p>
+             <div class="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.05)_50%)] dark:bg-[linear-gradient(transparent_50%,rgba(255,255,255,0.02)_50%)] bg-[length:100%_4px] pointer-events-none z-0"></div>
 
-             <!-- CIRCULAR PROGRESS BAR UPDATE -->
-             <div class="relative w-40 h-40 sm:w-56 sm:h-56 lg:w-72 lg:h-72 mx-auto mb-10 sm:mb-16 flex items-center justify-center z-10">
-                 <!-- SVG Lingkaran Animasi -->
-                 <svg class="w-full h-full absolute inset-0 drop-shadow-[0_0_15px_rgba(217,70,239,0.4)]" viewBox="0 0 120 120">
-                     <defs>
-                         <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                             <stop offset="0%" stop-color="#38bdf8" /> <!-- Brand 400 -->
-                             <stop offset="50%" stop-color="#6366f1" /> <!-- Brand 500 -->
-                             <stop offset="100%" stop-color="#d946ef" /> <!-- Fuchsia 600 -->
-                         </linearGradient>
-                     </defs>
-                     <!-- Track Background Putih Transparan -->
-                     <circle cx="60" cy="60" r="54" fill="none" stroke="currentColor" class="text-slate-200 dark:text-white/10" stroke-width="2" />
-                     <!-- Lingkaran Progress Beranimasi -->
-                     <circle cx="60" cy="60" r="54" fill="none" stroke="url(#progressGradient)"
-                             class="transition-all ease-linear"
-                             style="transition-duration: 1000ms;"
-                             stroke-width="5"
-                             stroke-linecap="round"
-                             stroke-dasharray="339.292"
-                             :stroke-dashoffset="339.292 - (countdown / 5) * 339.292"
-                             transform="rotate(-90 60 60)" />
+             <h3 class="font-mono text-xl sm:text-2xl font-bold mb-2 relative z-10 uppercase tracking-[0.3em] text-brand-500 dark:text-brand-400 animate-pulse">Establishing Connection</h3>
+             <p class="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-slate-900 dark:text-white mb-10 sm:mb-14 relative z-10 tracking-tight">Otentikasi Server Discord...</p>
+
+             <div class="relative w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 mx-auto mb-10 sm:mb-16 flex items-center justify-center z-10">
+                 <svg class="w-full h-full absolute inset-0 animate-dash-rotate text-brand-500/30 dark:text-brand-500/50" viewBox="0 0 120 120"><circle cx="60" cy="60" r="58" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="10 5" /></svg>
+                 <svg class="w-[90%] h-[90%] absolute drop-shadow-[0_0_20px_rgba(99,102,241,0.5)]" viewBox="0 0 120 120">
+                     <defs><linearGradient id="cyberGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#38bdf8" /><stop offset="50%" stop-color="#6366f1" /><stop offset="100%" stop-color="#d946ef" /></linearGradient></defs>
+                     <circle cx="60" cy="60" r="54" fill="none" stroke="currentColor" class="text-slate-200 dark:text-white/10" stroke-width="3" />
+                     <circle cx="60" cy="60" r="54" fill="none" stroke="url(#cyberGradient)" class="transition-all ease-linear" style="transition-duration: 1000ms;" stroke-width="8" stroke-linecap="round" stroke-dasharray="339.292" :stroke-dashoffset="339.292 - (countdown / 5) * 339.292" transform="rotate(-90 60 60)" />
                  </svg>
-                 <!-- Angka Hitung Mundur -->
                  <div class="relative flex items-center justify-center w-full h-full">
-                     <span class="font-display font-black text-6xl sm:text-8xl lg:text-[8rem] leading-none drop-shadow-2xl text-slate-900 dark:text-white" x-text="countdown"></span>
+                     <span class="font-display font-black text-[5rem] sm:text-[7rem] lg:text-[9rem] leading-none drop-shadow-2xl text-slate-900 dark:text-white" x-text="countdown"></span>
                  </div>
              </div>
 
              <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 relative z-10">
-                 <button @click="cancelDiscordFlow()" class="interactive-btn flex-1 py-5 sm:py-6 rounded-2xl sm:rounded-[2.5rem] bg-slate-200 dark:bg-white/10 font-display font-black text-lg sm:text-2xl hover:scale-105 active:scale-95 transition-transform cursor-none border border-transparent dark:border-white/10">Batal</button>
-                 
-                 <a :href="countdown === 0 ? 'https://discord.gg/QmN7Su3Adm' : '#'" target="_blank"
-                    @click="if(countdown > 0) { $event.preventDefault(); } else { discordModal = false; }"
-                    class="interactive-btn flex-1 py-5 sm:py-6 rounded-2xl sm:rounded-[2.5rem] font-display font-black text-white flex items-center justify-center text-lg sm:text-2xl transition-all cursor-none border border-transparent"
-                    :class="countdown === 0 ? 'bg-gradient-to-r from-brand-400 to-brand-600 shadow-[0_15px_30px_rgba(99,102,241,0.5)] hover:scale-105 active:scale-95' : 'bg-slate-300 dark:bg-white/10 text-slate-500 cursor-not-allowed dark:border-white/5'">
-                     <span x-text="countdown === 0 ? 'Masuk Sekarang' : 'Menunggu...'"></span>
+                 <button @click="cancelDiscordFlow()" class="interactive-btn flex-1 py-5 sm:py-6 rounded-[2rem] bg-slate-100 dark:bg-white/5 font-display font-black text-slate-700 dark:text-white text-lg sm:text-2xl hover:bg-rose-500 hover:text-white dark:hover:bg-rose-500 dark:hover:text-white hover:scale-105 active:scale-95 transition-all duration-300 cursor-none border border-slate-200 dark:border-white/10 shadow-inner hover:shadow-[0_0_20px_rgba(244,63,94,0.4)]">Batalkan</button>
+                 <a :href="countdown === 0 ? 'https://discord.gg/QmN7Su3Adm' : '#'" target="_blank" @click="if(countdown > 0) { $event.preventDefault(); } else { discordModal = false; }" class="interactive-btn flex-[2] py-5 sm:py-6 rounded-[2rem] font-display font-black text-white flex items-center justify-center text-lg sm:text-2xl transition-all duration-300 cursor-none border border-transparent" :class="countdown === 0 ? 'bg-gradient-to-r from-brand-500 to-fuchsia-500 shadow-[0_15px_40px_rgba(99,102,241,0.5)] hover:scale-105 active:scale-95 animate-pulse-glow' : 'bg-slate-300 dark:bg-white/10 text-slate-500 cursor-not-allowed'">
+                     <span x-text="countdown === 0 ? 'MEMASUKI SERVER 🚀' : 'Menyinkronkan Data...'"></span>
                  </a>
              </div>
         </div>
@@ -667,11 +685,32 @@
             return {
                 showGateway: true, 
                 gatewayStep: 0,
+                bootProgress: 0,
+                mainUiReady: false, // STATE BARU UNTUK CASCADING UI REVEAL
+                flashState: 0, // 0 = off, 1 = flashing
+                flashColor: 'dark', // Menyesuaikan dengan tema yang dipilih
+                
+                // TERMINAL HACKING LOGIC
+                displayedLogs: [],
+                fullLogs: [
+                    '[SYSTEM] INIT HYPER-LINK TO NODE-7...',
+                    '[NETWORK] FIREWALL BYPASSED (PING: 12ms)',
+                    '[CORE] DECRYPTING DIMENSIONAL DATA...',
+                    '[ENGINE] LOADING 3D ENVIRONMENT...',
+                    '[AUTH] VERIFYING USER CREDENTIALS...',
+                    '<span class="text-emerald-400 font-bold">[SUCCESS] ACCESS GRANTED.</span>'
+                ],
+                randomHex: '0x0000',
+                
+                settingsModal: false,
                 isDark: true,
+                sfxEnabled: true,
+                animationsEnabled: localStorage.getItem('mastreo_animations') !== 'false',
+                customCursor: localStorage.getItem('mastreo_cursor') !== 'false',
+
                 activeTab: 'pendahuluan',
                 activeRuleTab: 'ingame',
                 openAccordion: null,
-                sfxEnabled: true,
                 audioCtx: null,
                 discordModal: false,
                 countdown: 5,
@@ -681,11 +720,31 @@
                 toastMessage: '',
 
                 initApp() {
-                    this.applyThemeClass();
-                    
-                    setTimeout(() => { this.gatewayStep = 1; this.playSfx('tick'); }, 600);
-                    setTimeout(() => { this.gatewayStep = 2; this.playSfx('tick'); }, 1800);
-                    setTimeout(() => { this.gatewayStep = 3; this.playSfx('ready'); }, 3000);
+                    // Random Hex Generator untuk Scanner Terminal
+                    setInterval(() => { this.randomHex = '0x' + Math.floor(Math.random()*16777215).toString(16).toUpperCase(); }, 100);
+
+                    // STEP 0: TERMINAL BOOTING SEQUENCE
+                    let logIndex = 0;
+                    let logInterval = setInterval(() => {
+                        if (logIndex < this.fullLogs.length) {
+                            this.displayedLogs.push(this.fullLogs[logIndex]);
+                            logIndex++;
+                            this.playSfx('typing');
+                        } else {
+                            clearInterval(logInterval);
+                        }
+                    }, 300);
+
+                    let bootInterval = setInterval(() => {
+                        if (this.bootProgress < 100) { this.bootProgress += Math.floor(Math.random() * 15) + 5; }
+                        if (this.bootProgress >= 100) { 
+                            this.bootProgress = 100; 
+                            clearInterval(bootInterval); 
+                        }
+                    }, 150);
+
+                    setTimeout(() => { this.gatewayStep = 1; this.playSfx('boom'); }, 2200); 
+                    setTimeout(() => { this.gatewayStep = 2; this.playSfx('glide'); }, 3800); 
 
                     const initAudio = () => {
                         try {
@@ -699,39 +758,84 @@
                     };
                     document.addEventListener('click', initAudio);
                     document.addEventListener('touchstart', initAudio);
-
+                    
+                    this.initCustomCursor();
+                },
+                
+                initCustomCursor() {
                     if (window.matchMedia("(pointer: fine)").matches) {
                         const dot = document.querySelector('.cursor-dot');
                         const outline = document.querySelector('.cursor-outline');
                         window.addEventListener('mousemove', (e) => {
-                            dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
-                            outline.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
+                            if(this.customCursor) {
+                                dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
+                                outline.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
+                            }
                         });
-                        document.querySelectorAll('.interactive-btn, button, a, input').forEach(el => {
-                            el.addEventListener('mouseenter', () => outline.classList.add('hovering'));
-                            el.addEventListener('mouseleave', () => outline.classList.remove('hovering'));
-                        });
+                        const updateHoverListeners = () => {
+                            document.querySelectorAll('.interactive-btn, button, a, input').forEach(el => {
+                                el.removeEventListener('mouseenter', window._cursorEnter);
+                                el.removeEventListener('mouseleave', window._cursorLeave);
+                                window._cursorEnter = () => outline.classList.add('hovering');
+                                window._cursorLeave = () => outline.classList.remove('hovering');
+                                el.addEventListener('mouseenter', window._cursorEnter);
+                                el.addEventListener('mouseleave', window._cursorLeave);
+                            });
+                        };
+                        updateHoverListeners();
+                        setInterval(updateHoverListeners, 2000);
                     }
                 },
 
-                selectTheme(wantsDark) {
-                    this.playSfx('ready');
-                    this.isDark = wantsDark;
-                    this.applyThemeClass();
-                    this.showGateway = false;
+                getGatewayWrapperStyle() {
+                    if (this.gatewayStep === 1) {
+                        const offset = window.innerWidth < 768 ? '25vh' : '28vh';
+                        return `transform: translateY(${offset});`;
+                    } else if (this.gatewayStep >= 2) {
+                        return `transform: translateY(0);`;
+                    }
+                    return '';
                 },
 
-                toggleTheme() {
-                    this.playSfx('click');
-                    this.isDark = !this.isDark;
-                    this.applyThemeClass();
+                // LOGIKA TRANSISI HYPER-WARP BARU (99999999x SAKTI)
+                selectThemeAndEnter(theme) {
+                    this.playSfx('warp'); // Epic warp sound!
+                    this.isDark = (theme === 'dark');
+                    this.flashColor = theme;
+                    
+                    this.gatewayStep = 3; // Trigger warp Zoom-In ekstrem Gateway
+                    
+                    // Flash layar di frame-frame terakhir sebelum UI ganti
+                    setTimeout(() => {
+                        this.flashState = 1; // Layar full putih/hitam
+                    }, 500);
+
+                    // Di titik puncak kilatan, kita ubah background di balik layar dan munculkan UI
+                    setTimeout(() => { 
+                        this.applyThemeClass();
+                        this.showGateway = false; 
+                        window.scrollTo(0,0);
+                        
+                        // Setelah Gateway hilang & tema terpasang, UI mulai menyusun dirinya masuk perlahan
+                        setTimeout(() => {
+                            this.flashState = 0; // Flash pudar
+                            this.mainUiReady = true; // TRIGGERS CASCADING UI REVEAL!
+                            this.playSfx('ui_reveal');
+                        }, 200); 
+                        
+                    }, 1200); // 1200ms adalah durasi pas dengan selesainya efek audio Warp
                 },
 
-                applyThemeClass() {
-                    if (this.isDark) { document.documentElement.classList.add('dark'); } 
-                    else { document.documentElement.classList.remove('dark'); }
-                },
+                // SETTINGS & TOOLS LOGIC
+                openSettings() { this.playSfx('click'); this.settingsModal = true; },
+                closeSettings() { this.playSfx('click'); this.settingsModal = false; },
+                toggleTheme() { this.isDark = !this.isDark; this.applyThemeClass(); this.playSfx('click'); },
+                applyThemeClass() { if (this.isDark) { document.documentElement.classList.add('dark'); } else { document.documentElement.classList.remove('dark'); } },
+                toggleSfx() { this.sfxEnabled = !this.sfxEnabled; if(this.sfxEnabled) { this.playSfx('click'); } },
+                toggleAnimations() { this.animationsEnabled = !this.animationsEnabled; localStorage.setItem('mastreo_animations', this.animationsEnabled); this.playSfx('click'); },
+                toggleCursor() { this.customCursor = !this.customCursor; localStorage.setItem('mastreo_cursor', this.customCursor); this.playSfx('click'); },
 
+                // EPIC WEB AUDIO SYNTHESIS
                 playSfx(type) {
                     if (!this.sfxEnabled) return;
                     try {
@@ -740,22 +844,74 @@
                         const osc = ctx.createOscillator();
                         const gain = ctx.createGain();
                         osc.connect(gain); gain.connect(ctx.destination);
-                        let vol = 0.05;
+                        
                         if (type === 'click') {
                             osc.frequency.setValueAtTime(900, ctx.currentTime);
                             osc.frequency.exponentialRampToValueAtTime(1300, ctx.currentTime + 0.05);
+                            gain.gain.setValueAtTime(0.05, ctx.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.1);
+                            osc.start(); osc.stop(ctx.currentTime + 0.1);
                         } else if (type === 'tick') {
                             osc.frequency.setValueAtTime(1200, ctx.currentTime);
-                        } else if (type === 'ready') {
-                            osc.frequency.setValueAtTime(500, ctx.currentTime);
-                            osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.4);
+                            gain.gain.setValueAtTime(0.02, ctx.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+                            osc.start(); osc.stop(ctx.currentTime + 0.05);
+                        } else if (type === 'typing') {
+                            osc.type = 'square';
+                            osc.frequency.setValueAtTime(2000 + Math.random()*500, ctx.currentTime);
+                            gain.gain.setValueAtTime(0.01, ctx.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+                            osc.start(); osc.stop(ctx.currentTime + 0.05);
+                        } else if (type === 'boom') {
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(150, ctx.currentTime);
+                            osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.5);
+                            gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.8);
+                            osc.start(); osc.stop(ctx.currentTime + 0.8);
+                        } else if (type === 'glide') {
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(400, ctx.currentTime);
+                            osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.6);
+                            gain.gain.setValueAtTime(0.0, ctx.currentTime);
+                            gain.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 0.2);
+                            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.6);
+                            osc.start(); osc.stop(ctx.currentTime + 0.6);
+                        } else if (type === 'warp') { 
+                            // Hyper-Warp Sound!
+                            const osc2 = ctx.createOscillator();
+                            osc.type = 'sawtooth'; osc2.type = 'square';
+                            osc.frequency.setValueAtTime(100, ctx.currentTime);
+                            osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 1.2);
+                            osc2.frequency.setValueAtTime(105, ctx.currentTime);
+                            osc2.frequency.exponentialRampToValueAtTime(1205, ctx.currentTime + 1.2);
+                            
+                            const filter = ctx.createBiquadFilter();
+                            filter.type = 'lowpass';
+                            filter.frequency.setValueAtTime(100, ctx.currentTime);
+                            filter.frequency.exponentialRampToValueAtTime(5000, ctx.currentTime + 1.2);
+                            
+                            osc.connect(filter); osc2.connect(filter); filter.connect(gain);
+                            gain.gain.setValueAtTime(0, ctx.currentTime);
+                            gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.5);
+                            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+                            
+                            osc.start(); osc2.start();
+                            osc.stop(ctx.currentTime + 1.2); osc2.stop(ctx.currentTime + 1.2);
+                        } else if (type === 'ui_reveal') {
+                            // Suara kristal jernih saat UI muncul
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(800, ctx.currentTime);
+                            osc.frequency.exponentialRampToValueAtTime(1600, ctx.currentTime + 0.5);
+                            gain.gain.setValueAtTime(0, ctx.currentTime);
+                            gain.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 0.1);
+                            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.0);
+                            osc.start(); osc.stop(ctx.currentTime + 1.0);
                         }
-                        gain.gain.setValueAtTime(vol, ctx.currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.1);
-                        osc.start(); osc.stop(ctx.currentTime + 0.1);
                     } catch(e) {}
                 },
 
+                // TAB NAVIGATION
                 switchTab(tab) {
                     if(this.activeTab !== tab) {
                         this.playSfx('click');
@@ -765,7 +921,6 @@
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                 },
-
                 switchRuleTab(tab) {
                     if(this.activeRuleTab !== tab) {
                         this.playSfx('click');
@@ -773,84 +928,60 @@
                         this.openAccordion = null;
                     }
                 },
-
                 toggleAccordion(id) {
                     this.playSfx('click');
                     this.openAccordion = this.openAccordion === id ? null : id;
+                },
+
+                // CLIPBOARD UTILITY
+                copyToClipboard(text, msg) {
+                    const fallbackCopy = (textToCopy) => {
+                        const textArea = document.createElement("textarea");
+                        textArea.value = textToCopy;
+                        textArea.style.position = "fixed"; textArea.style.left = "-999999px"; 
+                        document.body.appendChild(textArea);
+                        textArea.focus(); textArea.select();
+                        try {
+                            document.execCommand('copy');
+                            this.toastMessage = msg; this.playSfx('tick');
+                            setTimeout(() => { this.toastMessage = ''; }, 2500);
+                        } catch (err) {}
+                        textArea.remove();
+                    };
+                    if (navigator.clipboard && window.isSecureContext) {
+                        navigator.clipboard.writeText(text).then(() => {
+                            this.toastMessage = msg; this.playSfx('tick');
+                            setTimeout(() => { this.toastMessage = ''; }, 2500);
+                        }).catch(() => fallbackCopy(text)); 
+                    } else { fallbackCopy(text); }
                 },
 
                 getIndicatorStyle() {
                     const tabs = ['pendahuluan', 'rules', 'recruitment', 'session'];
                     let index = tabs.indexOf(this.activeTab);
                     if(index === -1) index = 0;
-                    let widthPercent = 25; 
-                    let gapPadding = 8; 
-                    let left = `calc(${index * widthPercent}% + 4px)`;
-                    let width = `calc(${widthPercent}% - ${gapPadding}px)`;
-                    return `left: ${left}; width: ${width};`;
+                    let widthPercent = 25; let gapPadding = 8; 
+                    return `left: calc(${index * widthPercent}% + 4px); width: calc(${widthPercent}% - ${gapPadding}px);`;
                 },
-
                 getRuleIndicatorStyle() {
                     const tabs = ['ingame', 'bannedcars', 'discord'];
                     let index = tabs.indexOf(this.activeRuleTab);
                     if(index === -1) index = 0;
-                    let widthPercent = 33.333; 
-                    let gapPadding = 8;
-                    let left = `calc(${index * widthPercent}% + 4px)`;
-                    let width = `calc(${widthPercent}% - ${gapPadding}px)`;
-                    return `left: ${left}; width: ${width};`;
-                },
-
-                copyToClipboard(text, msg) {
-                    const fallbackCopy = (textToCopy) => {
-                        const textArea = document.createElement("textarea");
-                        textArea.value = textToCopy;
-                        textArea.style.position = "fixed"; 
-                        textArea.style.left = "-999999px"; 
-                        textArea.style.top = "-999999px";
-                        document.body.appendChild(textArea);
-                        textArea.focus();
-                        textArea.select();
-                        try {
-                            document.execCommand('copy');
-                            this.toastMessage = msg;
-                            this.playSfx('ready');
-                            setTimeout(() => { this.toastMessage = ''; }, 2500);
-                        } catch (err) {
-                            console.error('Gagal menyalin teks', err);
-                        }
-                        textArea.remove();
-                    };
-
-                    if (navigator.clipboard && window.isSecureContext) {
-                        navigator.clipboard.writeText(text).then(() => {
-                            this.toastMessage = msg;
-                            this.playSfx('ready');
-                            setTimeout(() => { this.toastMessage = ''; }, 2500);
-                        }).catch(() => fallbackCopy(text)); 
-                    } else {
-                        fallbackCopy(text);
-                    }
+                    let widthPercent = 33.333; let gapPadding = 8;
+                    return `left: calc(${index * widthPercent}% + 4px); width: calc(${widthPercent}% - ${gapPadding}px);`;
                 },
 
                 startDiscordFlow() {
                     this.playSfx('click');
                     this.discordModal = true;
-                    // Reset countdown secara instan ke 5
                     this.countdown = 5;
                     clearInterval(this.countdownInterval);
                     this.countdownInterval = setInterval(() => {
                         this.countdown--;
-                        if (this.countdown > 0) {
-                            this.playSfx('tick');
-                        } else {
-                            this.countdown = 0;
-                            clearInterval(this.countdownInterval);
-                            this.playSfx('ready');
-                        }
+                        if (this.countdown > 0) { this.playSfx('tick'); } 
+                        else { this.countdown = 0; clearInterval(this.countdownInterval); this.playSfx('boom'); }
                     }, 1000);
                 },
-
                 cancelDiscordFlow() {
                     this.playSfx('click');
                     this.discordModal = false;
